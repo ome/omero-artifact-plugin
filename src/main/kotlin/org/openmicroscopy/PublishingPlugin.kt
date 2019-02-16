@@ -1,19 +1,33 @@
 package org.openmicroscopy
 
+import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.plugins.GroovyPlugin
+import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.bundling.Jar
-import org.gradle.kotlin.dsl.apply
-import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 import org.gradle.kotlin.dsl.*
+import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
+import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
+import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
+import org.openmicroscopy.PluginHelper.Companion.getRuntimeClasspathConfiguration
+import java.text.SimpleDateFormat
+import java.util.*
 
 class PublishingPlugin : Plugin<Project> {
-    override fun apply(project: Project) {
-        project.applyPublishingPlugin()
-        project.configurePublishingExtension()
+    override fun apply(project: Project): Unit = project.run {
+        applyPublishingPlugin()
+
+        plugins.withType<JavaPlugin> {
+            configureManifest()
+            configurePublishingExtension()
+            configureArtifactoryExtension()
+        }
     }
 
     private
@@ -22,57 +36,56 @@ class PublishingPlugin : Plugin<Project> {
         apply<ArtifactoryPlugin>()
     }
 
+    // ORIGINAL
+    /* jar {
+        manifest {
+            attributes(
+                    'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
+            'Created-By': "Gradle ${gradle.gradleVersion}",
+            'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
+            'Main-Class': 'ome.util.tasks.Run',
+            "Class-Path": configurations.runtimeClasspath.collect { it.getName() }.join(' ')
+            )
+        }
+    }*/
+    private
+    fun Project.configureManifest() {
+        tasks.named<Jar>("jar").configure {
+            manifest {
+                attributes["Implementation-Title"] = name.replace(Regex("[^A-Za-z0-9]"), "")
+                attributes["Implementation-Version"] = project.version
+                attributes["Built-By"] = System.getProperty("user.name")
+                attributes["Built-Date"] = SimpleDateFormat("dd/MM/yyyy").format(Date())
+                attributes["Built-JDK"] = System.getProperty("java.version")
+                attributes["Built-Gradle"] = gradle.gradleVersion
+                attributes["Class-Path"] = getRuntimeClasspathConfiguration(project)
+                        ?.joinToString(separator = " ") { it.name }
+            }
+        }
+    }
+
     private
     fun Project.configurePublishingExtension() {
-        val sourcesJar: Jar by tasks
-        val groovydocJar: Jar by tasks
-        val javadocJar: Jar by tasks
-
         configure<PublishingExtension> {
             publications {
                 create<MavenPublication>("mavenJava") {
                     from(components["java"])
-                    artifact(sourcesJar)
-                    artifact(groovydocJar)
-                    artifact(javadocJar)
+                    artifact(tasks.getByName("sourcesJar"))
+                    artifact(tasks.getByName("javadocJar"))
+
+                    plugins.withType(GroovyPlugin::class) {
+                        artifact(tasks.getByName("groovydocJar"))
+                    }
 
                     pom {
-                        name.set("Gradle Docker plugin")
-                        description.set("Gradle plugin for managing Docker images and containers.")
-                        url.set("https://github.com/bmuschko/gradle-docker-plugin")
-                        inceptionYear.set("2014")
-
-                        scm {
-                            url.set("https://github.com/bmuschko/gradle-docker-plugin")
-                            connection.set("scm:https://bmuschko@github.com/bmuschko/gradle-docker-plugin.git")
-                            developerConnection.set("scm:git://github.com/bmuschko/gradle-docker-plugin.git")
-                        }
-
                         licenses {
                             license {
-                                name.set("The Apache Software License, Version 2.0")
-                                url.set("http://www.apache.org/licenses/LICENSE-2.0.txt")
+                                name.set("GNU General Public License, Version 2")
+                                url.set("https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html")
                                 distribution.set("repo")
                             }
                         }
-
-                        developers {
-                            developer {
-                                id.set("bmuschko")
-                                name.set("Benjamin Muschko")
-                                url.set("https://github.com/bmuschko")
-                            }
-                            developer {
-                                id.set("cdancy")
-                                name.set("Christopher Dancy")
-                                url.set("https://github.com/cdancy")
-                            }
-                            developer {
-                                id.set("orzeh")
-                                name.set("Łukasz Warchał")
-                                url.set("https://github.com/orzeh")
-                            }
-                        }
+                        configureRepositories(repositories)
                     }
                 }
             }
@@ -80,58 +93,38 @@ class PublishingPlugin : Plugin<Project> {
     }
 
     private
-    fun Project.configureBintrayExtension() {
-        val packageName = "com.bmuschko:gradle-docker-plugin"
-
-//        configure<ArtifactoryPlugin> {
-//            username = resolveProperty("BINTRAY_USER", "bintrayUser")
-//            password = resolveProperty("BINTRAY_KEY", "bintrayKey")
-//            setPublications("mavenJava")
-//            publish = true
-//
-//            pkg(closureOf<BintrayExtension.PackageConfig> {
-//                repo = "gradle-plugins"
-//                name = packageName
-//                desc = "Gradle plugin for managing Docker images and containers."
-//                websiteUrl = "https://github.com/bmuschko/${project.name}"
-//                issueTrackerUrl = "https://github.com/bmuschko/${project.name}/issues"
-//                vcsUrl = "https://github.com/bmuschko/${project.name}.git"
-//                setLicenses("Apache-2.0")
-//                setLabels("gradle", "docker", "container", "image", "lightweight", "vm", "linux")
-//                publicDownloadNumbers = true
-//                githubRepo = "bmuschko/${project.name}"
-//
-//                version(closureOf<BintrayExtension.VersionConfig> {
-//                    released = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZ").format(Date())
-//                    vcsTag = "v${project.version}"
-//                    setAttributes(mapOf("gradle-plugin" to listOf("com.bmuschko.docker-remote-api:${packageName}",
-//                            "com.bmuschko.docker-java-application:${packageName}",
-//                            "com.bmuschko.docker-spring-boot-application:${packageName}")))
-//
-//                    gpg(closureOf<BintrayExtension.GpgConfig> {
-//                        sign = true
-//                        passphrase = resolveProperty("GPG_PASSPHRASE", "gpgPassphrase")
-//                    })
-//                    mavenCentralSync(closureOf<BintrayExtension.MavenCentralSyncConfig> {
-//                        sync = true
-//                        user = resolveProperty("MAVEN_CENTRAL_USER_TOKEN", "mavenCentralUserToken")
-//                        password = resolveProperty("MAVEN_CENTRAL_PASSWORD", "mavenCentralPassword")
-//                        close = "1"
-//                    })
-//                })
-//            })
-//        }
+    fun Project.configureArtifactoryExtension() {
+        configure<ArtifactoryPluginConvention> {
+            publish(delegateClosureOf<PublisherConfig> {
+                setContextUrl("https://artifacts.openmicroscopy.org/artifactory")
+                repository(delegateClosureOf<GroovyObject> {
+                    setProperty("repoKey", "")
+                    setProperty("username", resolveProperty("ARTIFACTORY_USER", "artifactorUser"))
+                    setProperty("password", resolveProperty("ARTIFACTORY_PASSWORD", "artifactorPassword"))
+                })
+            })
+        }
     }
 
     private
     fun Project.resolveProperty(envVarKey: String, projectPropKey: String): String? {
         val propValue = System.getenv()[envVarKey]
-
-        if(propValue != null) {
+        if (propValue != null) {
             return propValue
         }
-
         return findProperty(projectPropKey).toString()
+    }
+
+    private
+    fun Project.configureRepositories(repositoryHandler: RepositoryHandler) {
+        for (repo in repositories) {
+            if (repo is MavenArtifactRepository) {
+                repositoryHandler.maven {
+                    name = repo.name
+                    url = repo.url
+                }
+            }
+        }
     }
 
 }

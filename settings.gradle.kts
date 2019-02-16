@@ -1,2 +1,1 @@
-rootProject.name = "omero-artifactory-plugin"
-
+rootProject.name = "omero-artifact-plugin"
