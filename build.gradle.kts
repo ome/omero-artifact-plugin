@@ -32,37 +32,34 @@ gradlePlugin {
             id = "org.openmicroscopy.publishing"
             implementationClass = "org.openmicroscopy.PublishingPlugin"
         }
+        register("plugin-project-plugin") {
+            id = "org.openmicroscopy.plugin-project"
+            implementationClass = "org.openmicroscopy.PluginProjectPlugin"
+        }
+        register("plugin-publishing-plugin") {
+            id = "org.openmicroscopy.plugin-publishing"
+            implementationClass = "org.openmicroscopy.PluginPublishingPlugin"
+        }
     }
 }
 
 tasks {
-    create("sourcesJar", Jar::class) {
+    create<Jar>("sourcesJar") {
         archiveClassifier.set("sources")
         from(sourceSets["main"].allSource)
     }
 
-    create("javadocJar", Jar::class) {
+    create<Jar>("javadocJar") {
         archiveClassifier.set("javadoc")
         from(named("javadoc"))
     }
 }
 
-configure<PublishingExtension> {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"])
+project.afterEvaluate {
+    configure<PublishingExtension> {
+        publications.getByName("pluginMaven", closureOf<MavenPublication> {
             artifact(tasks.getByName("sourcesJar"))
             artifact(tasks.getByName("javadocJar"))
-
-            pom {
-                licenses {
-                    license {
-                        name.set("GNU General Public License, Version 2")
-                        url.set("https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html")
-                        distribution.set("repo")
-                    }
-                }
-            }
-        }
+        })
     }
 }

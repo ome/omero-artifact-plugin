@@ -11,11 +11,18 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.bundling.Jar
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.delegateClosureOf
+import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.withType
 import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
 import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
 import org.openmicroscopy.PluginHelper.Companion.getRuntimeClasspathConfiguration
+import org.openmicroscopy.PluginHelper.Companion.licenseGnu2
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -23,7 +30,7 @@ class PublishingPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
         applyPublishingPlugin()
 
-        plugins.withType<JavaPlugin> {
+        plugins.withType(JavaPlugin::class) {
             configureManifest()
             configurePublishingExtension()
             configureArtifactoryExtension()
@@ -78,13 +85,7 @@ class PublishingPlugin : Plugin<Project> {
                     }
 
                     pom {
-                        licenses {
-                            license {
-                                name.set("GNU General Public License, Version 2")
-                                url.set("https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html")
-                                distribution.set("repo")
-                            }
-                        }
+                        licenseGnu2()
                         configureRepositories(repositories)
                     }
                 }
