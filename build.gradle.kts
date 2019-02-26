@@ -24,6 +24,10 @@ gradlePlugin {
             id = "org.openmicroscopy.project"
             implementationClass = "org.openmicroscopy.ProjectPlugin"
         }
+        register("additional-repositories-plugin") {
+            id = "org.openmicroscopy.additional-repositories"
+            implementationClass = "org.openmicroscopy.AdditionalArtifactsPlugin"
+        }
         register("additional-artifacts-plugin") {
             id = "org.openmicroscopy.additional-artifacts"
             implementationClass = "org.openmicroscopy.AdditionalArtifactsPlugin"
