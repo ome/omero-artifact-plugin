@@ -7,6 +7,15 @@ plugins {
 group = "org.openmicroscopy"
 version = "5.5.0-SNAPSHOT"
 
+kotlinDslPluginOptions {
+    experimentalWarning.set(false)
+}
+
+configure<JavaPluginConvention> {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
 repositories {
     // Use jcenter for resolving your dependencies.
     // You can declare any Maven/Ivy/file repository here.

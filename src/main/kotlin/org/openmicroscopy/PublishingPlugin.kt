@@ -1,9 +1,9 @@
 package org.openmicroscopy
 
+import com.google.common.base.CaseFormat
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaPlugin
@@ -16,8 +16,6 @@ import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.delegateClosureOf
 import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.withType
 import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
 import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
@@ -25,16 +23,15 @@ import org.openmicroscopy.PluginHelper.Companion.getRuntimeClasspathConfiguratio
 import org.openmicroscopy.PluginHelper.Companion.licenseGnu2
 import java.text.SimpleDateFormat
 import java.util.*
+import org.gradle.kotlin.dsl.*
+
 
 class PublishingPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
         applyPublishingPlugin()
-
-        plugins.withType(JavaPlugin::class) {
-            configureManifest()
-            configurePublishingExtension()
-            configureArtifactoryExtension()
-        }
+        configureManifest()
+        configurePublishingExtension()
+        configureArtifactoryExtension()
     }
 
     private
@@ -57,16 +54,18 @@ class PublishingPlugin : Plugin<Project> {
     }*/
     private
     fun Project.configureManifest() {
-        tasks.named<Jar>("jar").configure {
-            manifest {
-                attributes["Implementation-Title"] = name.replace(Regex("[^A-Za-z0-9]"), "")
-                attributes["Implementation-Version"] = project.version
-                attributes["Built-By"] = System.getProperty("user.name")
-                attributes["Built-Date"] = SimpleDateFormat("dd/MM/yyyy").format(Date())
-                attributes["Built-JDK"] = System.getProperty("java.version")
-                attributes["Built-Gradle"] = gradle.gradleVersion
-                attributes["Class-Path"] = getRuntimeClasspathConfiguration(project)
-                        ?.joinToString(separator = " ") { it.name }
+        plugins.withType<JavaPlugin> {
+            tasks.named<Jar>("jar") {
+                manifest {
+                    attributes["Implementation-Title"] = name.replace(Regex("[^A-Za-z0-9]"), "")
+                    attributes["Implementation-Version"] = project.version
+                    attributes["Built-By"] = System.getProperty("user.name")
+                    attributes["Built-Date"] = SimpleDateFormat("dd/MM/yyyy").format(Date())
+                    attributes["Built-JDK"] = System.getProperty("java.version")
+                    attributes["Built-Gradle"] = gradle.gradleVersion
+                    attributes["Class-Path"] = getRuntimeClasspathConfiguration(project)
+                            ?.joinToString(separator = " ") { it.name }
+                }
             }
         }
     }
@@ -75,18 +74,36 @@ class PublishingPlugin : Plugin<Project> {
     fun Project.configurePublishingExtension() {
         configure<PublishingExtension> {
             publications {
-                create<MavenPublication>("mavenJava") {
-                    from(components["java"])
-                    artifact(tasks.getByName("sourcesJar"))
-                    artifact(tasks.getByName("javadocJar"))
+                create<MavenPublication>(camelCaseName()) {
+                    plugins.withType<JavaPlugin> {
+                        from(components["java"])
+                        artifact(tasks.named("sourcesJar").get())
 
-                    plugins.withType(GroovyPlugin::class) {
+                        val javadocsJar = tasks.findByName("javadocJar")
+                        if (javadocsJar != null)  {
+                            artifact(javadocsJar)
+                        }
+                    }
+
+                    plugins.withType<GroovyPlugin> {
                         artifact(tasks.getByName("groovydocJar"))
                     }
 
                     pom {
                         licenseGnu2()
-                        configureRepositories(repositories)
+                        afterEvaluate {
+                            withXml {
+                                val repositoriesNode = asNode().appendNode("repositories")
+                                repositories.forEach {
+                                    if (it is MavenArtifactRepository) {
+                                        val repositoryNode = repositoriesNode.appendNode("repository")
+                                        repositoryNode.appendNode("id", it.name)
+                                        repositoryNode.appendNode("name", it.name)
+                                        repositoryNode.appendNode("url", it.url)
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -117,15 +134,8 @@ class PublishingPlugin : Plugin<Project> {
     }
 
     private
-    fun Project.configureRepositories(repositoryHandler: RepositoryHandler) {
-        for (repo in repositories) {
-            if (repo is MavenArtifactRepository) {
-                repositoryHandler.maven {
-                    name = repo.name
-                    url = repo.url
-                }
-            }
-        }
+    fun Project.camelCaseName(): String {
+        return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, name)
     }
 
 }
