@@ -77,12 +77,8 @@ class PublishingPlugin : Plugin<Project> {
                 create<MavenPublication>(camelCaseName()) {
                     plugins.withType<JavaPlugin> {
                         from(components["java"])
-                        artifact(tasks.named("sourcesJar").get())
-
-                        val javadocsJar = tasks.findByName("javadocJar")
-                        if (javadocsJar != null)  {
-                            artifact(javadocsJar)
-                        }
+                        artifact(tasks.getByName("sourcesJar"))
+                        artifact(tasks.getByName("javadocJar"))
                     }
 
                     plugins.withType<GroovyPlugin> {
@@ -114,11 +110,11 @@ class PublishingPlugin : Plugin<Project> {
     fun Project.configureArtifactoryExtension() {
         configure<ArtifactoryPluginConvention> {
             publish(delegateClosureOf<PublisherConfig> {
-                setContextUrl("https://artifacts.openmicroscopy.org/artifactory")
+                setContextUrl(resolveProperty("ARTIFACTORY_URL", "artifactoryUrl"))
                 repository(delegateClosureOf<GroovyObject> {
-                    setProperty("repoKey", "")
-                    setProperty("username", resolveProperty("ARTIFACTORY_USER", "artifactorUser"))
-                    setProperty("password", resolveProperty("ARTIFACTORY_PASSWORD", "artifactorPassword"))
+                    setProperty("repoKey", resolveProperty("ARTIFACTORY_REPOKEY", "artifactoryRepokey"))
+                    setProperty("username", resolveProperty("ARTIFACTORY_USER", "artifactoryUser"))
+                    setProperty("password", resolveProperty("ARTIFACTORY_PASSWORD", "artifactoryPassword"))
                 })
             })
         }
