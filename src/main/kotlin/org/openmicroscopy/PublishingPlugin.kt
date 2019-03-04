@@ -1,6 +1,5 @@
 package org.openmicroscopy
 
-import com.google.common.base.CaseFormat
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -24,6 +23,8 @@ import org.openmicroscopy.PluginHelper.Companion.licenseGnu2
 import java.text.SimpleDateFormat
 import java.util.*
 import org.gradle.kotlin.dsl.*
+import org.openmicroscopy.PluginHelper.Companion.camelCaseName
+import org.openmicroscopy.PluginHelper.Companion.resolveProperty
 
 
 class PublishingPlugin : Plugin<Project> {
@@ -118,20 +119,6 @@ class PublishingPlugin : Plugin<Project> {
                 })
             })
         }
-    }
-
-    private
-    fun Project.resolveProperty(envVarKey: String, projectPropKey: String): String? {
-        val propValue = System.getenv()[envVarKey]
-        if (propValue != null) {
-            return propValue
-        }
-        return findProperty(projectPropKey).toString()
-    }
-
-    private
-    fun Project.camelCaseName(): String {
-        return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, name)
     }
 
 }

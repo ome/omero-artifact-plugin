@@ -1,5 +1,6 @@
 package org.openmicroscopy
 
+import com.google.common.base.CaseFormat
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaPlugin
@@ -17,6 +18,18 @@ class PluginHelper {
                 url.set("https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html")
                 distribution.set("repo")
             }
+        }
+
+        fun Project.resolveProperty(envVarKey: String, projectPropKey: String): String? {
+            val propValue = System.getenv()[envVarKey]
+            if (propValue != null) {
+                return propValue
+            }
+            return findProperty(projectPropKey).toString()
+        }
+
+        fun Project.camelCaseName(): String {
+            return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, name)
         }
     }
 }
