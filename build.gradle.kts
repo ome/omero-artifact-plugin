@@ -1,7 +1,12 @@
+import groovy.lang.GroovyObject
+import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
+import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
+
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
     `maven-publish`
+    id("com.jfrog.artifactory") version "4.9.1"
 }
 
 group = "org.openmicroscopy"
@@ -68,6 +73,17 @@ tasks {
     }
 }
 
+configure<ArtifactoryPluginConvention> {
+    publish(delegateClosureOf<PublisherConfig> {
+        setContextUrl(resolveProperty("ARTIFACTORY_URL", "artifactoryUrl"))
+        repository(delegateClosureOf<GroovyObject> {
+            setProperty("repoKey", resolveProperty("ARTIFACTORY_REPOKEY", "artifactoryRepokey"))
+            setProperty("username", resolveProperty("ARTIFACTORY_USER", "artifactoryUser"))
+            setProperty("password", resolveProperty("ARTIFACTORY_PASSWORD", "artifactoryPassword"))
+        })
+    })
+}
+
 project.afterEvaluate {
     configure<PublishingExtension> {
         publications.getByName("pluginMaven", closureOf<MavenPublication> {
@@ -75,4 +91,12 @@ project.afterEvaluate {
             artifact(tasks.getByName("javadocJar"))
         })
     }
+}
+
+fun resolveProperty(envVarKey: String, projectPropKey: String): String? {
+    val propValue = System.getenv()[envVarKey]
+    if (propValue != null) {
+        return propValue
+    }
+    return findProperty(projectPropKey).toString()
 }

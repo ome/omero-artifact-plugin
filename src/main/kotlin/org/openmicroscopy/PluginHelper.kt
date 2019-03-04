@@ -6,7 +6,6 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.maven.MavenPom
 
-
 class PluginHelper {
     companion object {
         fun getRuntimeClasspathConfiguration(project: Project): Configuration? =
