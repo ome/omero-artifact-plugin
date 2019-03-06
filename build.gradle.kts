@@ -1,6 +1,7 @@
 import groovy.lang.GroovyObject
 import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
 import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
+import java.net.URI
 
 plugins {
     `kotlin-dsl`
@@ -84,6 +85,22 @@ configure<ArtifactoryPluginConvention> {
     })
 }
 
+configure<PublishingExtension> {
+    repositories {
+        val chosenUrl = resolveProperty("MAVEN_REPO_URL", "mavenRepoUrl")
+        if (chosenUrl != null) {
+             maven {
+                url = URI.create(chosenUrl)
+                name = "maven"
+                credentials {
+                    username = resolveProperty("MAVEN_USER", "mavenUser")
+                    password = resolveProperty("MAVEN_PASSWORD", "mavenPassword")
+                }
+            }
+        }
+    }
+}
+
 project.afterEvaluate {
     configure<PublishingExtension> {
         publications.getByName("pluginMaven", closureOf<MavenPublication> {
@@ -94,9 +111,10 @@ project.afterEvaluate {
 }
 
 fun resolveProperty(envVarKey: String, projectPropKey: String): String? {
-    val propValue = System.getenv()[envVarKey]
+    val propValue = System.getenv(envVarKey)
     if (propValue != null) {
         return propValue
     }
-    return findProperty(projectPropKey).toString()
+
+    return findProperty(projectPropKey)?.toString()
 }

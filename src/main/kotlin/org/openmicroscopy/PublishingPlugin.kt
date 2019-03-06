@@ -12,21 +12,21 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.bundling.Jar
-import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.delegateClosureOf
-import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.*
 import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
 import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
+import org.openmicroscopy.PluginHelper.Companion.camelCaseName
+import org.openmicroscopy.PluginHelper.Companion.createArtifactoryMavenRepo
+import org.openmicroscopy.PluginHelper.Companion.createGitlabMavenRepo
+import org.openmicroscopy.PluginHelper.Companion.createStandardMavenRepo
 import org.openmicroscopy.PluginHelper.Companion.getRuntimeClasspathConfiguration
 import org.openmicroscopy.PluginHelper.Companion.licenseGnu2
+import org.openmicroscopy.PluginHelper.Companion.resolveProperty
+import org.openmicroscopy.PluginHelper.Companion.safeAdd
 import java.text.SimpleDateFormat
 import java.util.*
-import org.gradle.kotlin.dsl.*
-import org.openmicroscopy.PluginHelper.Companion.camelCaseName
-import org.openmicroscopy.PluginHelper.Companion.resolveProperty
+import kotlin.collections.set
 
 
 class PublishingPlugin : Plugin<Project> {
@@ -76,6 +76,12 @@ class PublishingPlugin : Plugin<Project> {
     private
     fun Project.configurePublishingExtension() {
         configure<PublishingExtension> {
+            repositories {
+                safeAdd(createArtifactoryMavenRepo())
+                safeAdd(createGitlabMavenRepo())
+                safeAdd(createStandardMavenRepo())
+            }
+
             publications {
                 create<MavenPublication>(camelCaseName()) {
                     plugins.withType<JavaPlugin> {
@@ -103,15 +109,17 @@ class PublishingPlugin : Plugin<Project> {
 
     private
     fun Project.configureArtifactoryExtension() {
-        configure<ArtifactoryPluginConvention> {
-            publish(delegateClosureOf<PublisherConfig> {
-                setContextUrl(resolveProperty("ARTIFACTORY_URL", "artifactoryUrl"))
-                repository(delegateClosureOf<GroovyObject> {
-                    setProperty("repoKey", resolveProperty("ARTIFACTORY_REPOKEY", "artifactoryRepokey"))
-                    setProperty("username", resolveProperty("ARTIFACTORY_USER", "artifactoryUser"))
-                    setProperty("password", resolveProperty("ARTIFACTORY_PASSWORD", "artifactoryPassword"))
+        plugins.withType<ArtifactoryPlugin> {
+            configure<ArtifactoryPluginConvention> {
+                publish(delegateClosureOf<PublisherConfig> {
+                    setContextUrl(resolveProperty("ARTIFACTORY_URL", "artifactoryUrl"))
+                    repository(delegateClosureOf<GroovyObject> {
+                        setProperty("repoKey", resolveProperty("ARTIFACTORY_REPOKEY", "artifactoryRepokey"))
+                        setProperty("username", resolveProperty("ARTIFACTORY_USER", "artifactoryUser"))
+                        setProperty("password", resolveProperty("ARTIFACTORY_PASSWORD", "artifactoryPassword"))
+                    })
                 })
-            })
+            }
         }
     }
 
