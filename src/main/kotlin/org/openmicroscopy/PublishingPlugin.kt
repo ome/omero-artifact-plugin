@@ -1,8 +1,10 @@
 package org.openmicroscopy
 
 import groovy.lang.GroovyObject
+import groovy.util.Node
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.XmlProvider
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaPlugin
@@ -90,15 +92,7 @@ class PublishingPlugin : Plugin<Project> {
                         licenseGnu2()
                         afterEvaluate {
                             withXml {
-                                val repositoriesNode = asNode().appendNode("repositories")
-                                repositories.forEach {
-                                    if (it is MavenArtifactRepository) {
-                                        val repositoryNode = repositoriesNode.appendNode("repository")
-                                        repositoryNode.appendNode("id", it.name)
-                                        repositoryNode.appendNode("name", it.name)
-                                        repositoryNode.appendNode("url", it.url)
-                                    }
-                                }
+                                repositoriesXml(this)
                             }
                         }
                     }
@@ -119,6 +113,20 @@ class PublishingPlugin : Plugin<Project> {
                 })
             })
         }
+    }
+
+    private
+    fun Project.repositoriesXml(xml: XmlProvider): Node {
+        val repositoriesNode = xml.asNode().appendNode("repositories")
+        repositories.forEach {
+            if (it is MavenArtifactRepository) {
+                val repositoryNode = repositoriesNode.appendNode("repository")
+                repositoryNode.appendNode("id", it.name)
+                repositoryNode.appendNode("name", it.name)
+                repositoryNode.appendNode("url", it.url)
+            }
+        }
+        return repositoriesNode
     }
 
 }
