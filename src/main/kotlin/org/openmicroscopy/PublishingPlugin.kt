@@ -1,9 +1,10 @@
 package org.openmicroscopy
 
 import groovy.lang.GroovyObject
+import groovy.util.Node
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.XmlProvider
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaPlugin
@@ -15,19 +16,25 @@ import org.gradle.kotlin.dsl.*
 import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
 import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
+import org.openmicroscopy.PluginHelper.Companion.camelCaseName
+import org.openmicroscopy.PluginHelper.Companion.createArtifactoryMavenRepo
+import org.openmicroscopy.PluginHelper.Companion.createGitlabMavenRepo
+import org.openmicroscopy.PluginHelper.Companion.createStandardMavenRepo
 import org.openmicroscopy.PluginHelper.Companion.getRuntimeClasspathConfiguration
+import org.openmicroscopy.PluginHelper.Companion.licenseGnu2
+import org.openmicroscopy.PluginHelper.Companion.resolveProperty
+import org.openmicroscopy.PluginHelper.Companion.safeAdd
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.collections.set
+
 
 class PublishingPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
         applyPublishingPlugin()
-
-        plugins.withType<JavaPlugin> {
-            configureManifest()
-            configurePublishingExtension()
-            configureArtifactoryExtension()
-        }
+        configureManifest()
+        configurePublishingExtension()
+        configureArtifactoryExtension()
     }
 
     private
@@ -50,16 +57,18 @@ class PublishingPlugin : Plugin<Project> {
     }*/
     private
     fun Project.configureManifest() {
-        tasks.named<Jar>("jar").configure {
-            manifest {
-                attributes["Implementation-Title"] = name.replace(Regex("[^A-Za-z0-9]"), "")
-                attributes["Implementation-Version"] = project.version
-                attributes["Built-By"] = System.getProperty("user.name")
-                attributes["Built-Date"] = SimpleDateFormat("dd/MM/yyyy").format(Date())
-                attributes["Built-JDK"] = System.getProperty("java.version")
-                attributes["Built-Gradle"] = gradle.gradleVersion
-                attributes["Class-Path"] = getRuntimeClasspathConfiguration(project)
-                        ?.joinToString(separator = " ") { it.name }
+        plugins.withType<JavaPlugin> {
+            tasks.named<Jar>("jar") {
+                manifest {
+                    attributes["Implementation-Title"] = name.replace(Regex("[^A-Za-z0-9]"), "")
+                    attributes["Implementation-Version"] = project.version
+                    attributes["Built-By"] = System.getProperty("user.name")
+                    attributes["Built-Date"] = SimpleDateFormat("dd/MM/yyyy").format(Date())
+                    attributes["Built-JDK"] = System.getProperty("java.version")
+                    attributes["Built-Gradle"] = gradle.gradleVersion
+                    attributes["Class-Path"] = getRuntimeClasspathConfiguration(project)
+                            ?.joinToString(separator = " ") { it.name }
+                }
             }
         }
     }
@@ -67,25 +76,31 @@ class PublishingPlugin : Plugin<Project> {
     private
     fun Project.configurePublishingExtension() {
         configure<PublishingExtension> {
-            publications {
-                create<MavenPublication>("mavenJava") {
-                    from(components["java"])
-                    artifact(tasks.getByName("sourcesJar"))
-                    artifact(tasks.getByName("javadocJar"))
+            repositories {
+                safeAdd(createArtifactoryMavenRepo())
+                safeAdd(createGitlabMavenRepo())
+                safeAdd(createStandardMavenRepo())
+            }
 
-                    plugins.withType(GroovyPlugin::class) {
+            publications {
+                create<MavenPublication>(camelCaseName()) {
+                    plugins.withType<JavaPlugin> {
+                        from(components["java"])
+                        artifact(tasks.getByName("sourcesJar"))
+                        artifact(tasks.getByName("javadocJar"))
+                    }
+
+                    plugins.withType<GroovyPlugin> {
                         artifact(tasks.getByName("groovydocJar"))
                     }
 
                     pom {
-                        licenses {
-                            license {
-                                name.set("GNU General Public License, Version 2")
-                                url.set("https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html")
-                                distribution.set("repo")
+                        licenseGnu2()
+                        afterEvaluate {
+                            withXml {
+                                repositoriesXml(this)
                             }
                         }
-                        configureRepositories(repositories)
                     }
                 }
             }
@@ -94,37 +109,32 @@ class PublishingPlugin : Plugin<Project> {
 
     private
     fun Project.configureArtifactoryExtension() {
-        configure<ArtifactoryPluginConvention> {
-            publish(delegateClosureOf<PublisherConfig> {
-                setContextUrl("https://artifacts.openmicroscopy.org/artifactory")
-                repository(delegateClosureOf<GroovyObject> {
-                    setProperty("repoKey", "")
-                    setProperty("username", resolveProperty("ARTIFACTORY_USER", "artifactorUser"))
-                    setProperty("password", resolveProperty("ARTIFACTORY_PASSWORD", "artifactorPassword"))
+        plugins.withType<ArtifactoryPlugin> {
+            configure<ArtifactoryPluginConvention> {
+                publish(delegateClosureOf<PublisherConfig> {
+                    setContextUrl(resolveProperty("ARTIFACTORY_URL", "artifactoryUrl"))
+                    repository(delegateClosureOf<GroovyObject> {
+                        setProperty("repoKey", resolveProperty("ARTIFACTORY_REPOKEY", "artifactoryRepokey"))
+                        setProperty("username", resolveProperty("ARTIFACTORY_USER", "artifactoryUser"))
+                        setProperty("password", resolveProperty("ARTIFACTORY_PASSWORD", "artifactoryPassword"))
+                    })
                 })
-            })
-        }
-    }
-
-    private
-    fun Project.resolveProperty(envVarKey: String, projectPropKey: String): String? {
-        val propValue = System.getenv()[envVarKey]
-        if (propValue != null) {
-            return propValue
-        }
-        return findProperty(projectPropKey).toString()
-    }
-
-    private
-    fun Project.configureRepositories(repositoryHandler: RepositoryHandler) {
-        for (repo in repositories) {
-            if (repo is MavenArtifactRepository) {
-                repositoryHandler.maven {
-                    name = repo.name
-                    url = repo.url
-                }
             }
         }
+    }
+
+    private
+    fun Project.repositoriesXml(xml: XmlProvider): Node {
+        val repositoriesNode = xml.asNode().appendNode("repositories")
+        repositories.forEach {
+            if (it is MavenArtifactRepository) {
+                val repositoryNode = repositoriesNode.appendNode("repository")
+                repositoryNode.appendNode("id", it.name)
+                repositoryNode.appendNode("name", it.name)
+                repositoryNode.appendNode("url", it.url)
+            }
+        }
+        return repositoriesNode
     }
 
 }
