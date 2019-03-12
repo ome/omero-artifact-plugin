@@ -61,6 +61,7 @@ class PluginPublishingPlugin : Plugin<Project> {
         }
     }
 
+    private
     fun Project.configureArtifactoryExtension() {
         plugins.withType<ArtifactoryPlugin> {
             configure<ArtifactoryPluginConvention> {

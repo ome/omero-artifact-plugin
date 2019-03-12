@@ -9,10 +9,10 @@
 *.DS_Store
 
 # generated files
-/bin/**
-/gen/**
-/out/**
-/build/**
+bin
+gen
+out
+build
 
 # IDEA/Android Studio project files, because
 # the project can be imported from settings.gradle

@@ -1,7 +1,6 @@
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
-    org.openmicroscopy.`plugin-project`
 }
 
 group = "org.openmicroscopy"
@@ -25,7 +24,7 @@ repositories {
 sourceSets {
     main {
         java {
-            srcDirs("${project.projectDir}/shared/src/main/kotlin")
+            setSrcDirs(listOf("${project.projectDir}/shared/src/main/kotlin"))
         }
     }
 }
@@ -37,9 +36,13 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        register("project-plugin") {
-            id = "org.openmicroscopy.project"
-            implementationClass = "org.openmicroscopy.ProjectPlugin"
+        register("plugin-project-plugin") {
+            id = "org.openmicroscopy.plugin-project"
+            implementationClass = "org.openmicroscopy.PluginProjectPlugin"
+        }
+        register("plugin-publishing-plugin") {
+            id = "org.openmicroscopy.plugin-publishing"
+            implementationClass = "org.openmicroscopy.PluginPublishingPlugin"
         }
         register("additional-repositories-plugin") {
             id = "org.openmicroscopy.additional-repositories"
@@ -48,18 +51,6 @@ gradlePlugin {
         register("additional-artifacts-plugin") {
             id = "org.openmicroscopy.additional-artifacts"
             implementationClass = "org.openmicroscopy.AdditionalArtifactsPlugin"
-        }
-        register("publishing-plugin") {
-            id = "org.openmicroscopy.publishing"
-            implementationClass = "org.openmicroscopy.PublishingPlugin"
-        }
-        register("plugin-project-plugin") {
-            id = "org.openmicroscopy.plugin-project"
-            implementationClass = "org.openmicroscopy.PluginProjectPlugin"
-        }
-        register("plugin-publishing-plugin") {
-            id = "org.openmicroscopy.plugin-publishing"
-            implementationClass = "org.openmicroscopy.PluginPublishingPlugin"
         }
     }
 }
