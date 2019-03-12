@@ -25,7 +25,7 @@ repositories {
 sourceSets {
     main {
         java {
-            srcDirs("${project.projectDir}/shared/src/main/kotlin")
+            srcDirs("shared/src/main/kotlin")
         }
     }
 }
