@@ -32,6 +32,11 @@ sourceSets {
 dependencies {
     implementation(kotlin("gradle-plugin"))
     implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3")
+    implementation("org.ajoberstar:grgit:1.9.1") {
+        setForce(true)
+    }
+    implementation("org.ajoberstar:gradle-git:1.7.1")
+    implementation("org.ajoberstar:gradle-git-publish:0.3.3")
 }
 
 gradlePlugin {
@@ -39,18 +44,6 @@ gradlePlugin {
         register("plugin-project-plugin") {
             id = "org.openmicroscopy.plugin-project"
             implementationClass = "org.openmicroscopy.PluginProjectPlugin"
-        }
-        register("plugin-publishing-plugin") {
-            id = "org.openmicroscopy.plugin-publishing"
-            implementationClass = "org.openmicroscopy.PluginPublishingPlugin"
-        }
-        register("additional-repositories-plugin") {
-            id = "org.openmicroscopy.additional-repositories"
-            implementationClass = "org.openmicroscopy.AdditionalArtifactsPlugin"
-        }
-        register("additional-artifacts-plugin") {
-            id = "org.openmicroscopy.additional-artifacts"
-            implementationClass = "org.openmicroscopy.AdditionalArtifactsPlugin"
         }
     }
 }
