@@ -21,14 +21,6 @@ repositories {
     jcenter()
 }
 
-sourceSets {
-    main {
-        java {
-            setSrcDirs(listOf("../shared/src/main/kotlin"))
-        }
-    }
-}
-
 dependencies {
     implementation(kotlin("gradle-plugin"))
     implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3")
