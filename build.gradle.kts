@@ -1,13 +1,7 @@
-import groovy.lang.GroovyObject
-import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
-import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
-import java.net.URI
-
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
-    `maven-publish`
-    id("com.jfrog.artifactory") version "4.9.1"
+    org.openmicroscopy.`plugin-project`
 }
 
 group = "org.openmicroscopy"
@@ -17,20 +11,19 @@ kotlinDslPluginOptions {
     experimentalWarning.set(false)
 }
 
-configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
-
 repositories {
-    // Use jcenter for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
     jcenter()
 }
 
 dependencies {
     implementation(kotlin("gradle-plugin"))
-    implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.9.1")
+    implementation("com.squareup:javapoet:1.11.1")
+    implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3")
+    implementation("org.ajoberstar:grgit:1.9.1") {
+        setForce(true)
+    }
+    implementation("org.ajoberstar:gradle-git:1.7.1")
+    implementation("org.ajoberstar:gradle-git-publish:0.3.3")
 }
 
 gradlePlugin {
@@ -41,7 +34,7 @@ gradlePlugin {
         }
         register("additional-repositories-plugin") {
             id = "org.openmicroscopy.additional-repositories"
-            implementationClass = "org.openmicroscopy.AdditionalArtifactsPlugin"
+            implementationClass = "org.openmicroscopy.AdditionalRepositoriesPlugin"
         }
         register("additional-artifacts-plugin") {
             id = "org.openmicroscopy.additional-artifacts"
@@ -59,62 +52,9 @@ gradlePlugin {
             id = "org.openmicroscopy.plugin-publishing"
             implementationClass = "org.openmicroscopy.PluginPublishingPlugin"
         }
-    }
-}
-
-tasks {
-    create<Jar>("sourcesJar") {
-        archiveClassifier.set("sources")
-        from(sourceSets["main"].allSource)
-    }
-
-    create<Jar>("javadocJar") {
-        archiveClassifier.set("javadoc")
-        from(named("javadoc"))
-    }
-}
-
-configure<ArtifactoryPluginConvention> {
-    publish(delegateClosureOf<PublisherConfig> {
-        setContextUrl(resolveProperty("ARTIFACTORY_URL", "artifactoryUrl"))
-        repository(delegateClosureOf<GroovyObject> {
-            setProperty("repoKey", resolveProperty("ARTIFACTORY_REPOKEY", "artifactoryRepokey"))
-            setProperty("username", resolveProperty("ARTIFACTORY_USER", "artifactoryUser"))
-            setProperty("password", resolveProperty("ARTIFACTORY_PASSWORD", "artifactoryPassword"))
-        })
-    })
-}
-
-configure<PublishingExtension> {
-    repositories {
-        val chosenUrl = resolveProperty("MAVEN_REPO_URL", "mavenRepoUrl")
-        if (chosenUrl != null) {
-             maven {
-                url = URI.create(chosenUrl)
-                name = "maven"
-                credentials {
-                    username = resolveProperty("MAVEN_USER", "mavenUser")
-                    password = resolveProperty("MAVEN_PASSWORD", "mavenPassword")
-                }
-            }
+        register("release-plugin") {
+            id = "org.openmicroscopy.release"
+            implementationClass = "org.openmicroscopy.ReleasePlugin"
         }
     }
-}
-
-project.afterEvaluate {
-    configure<PublishingExtension> {
-        publications.getByName("pluginMaven", closureOf<MavenPublication> {
-            artifact(tasks.getByName("sourcesJar"))
-            artifact(tasks.getByName("javadocJar"))
-        })
-    }
-}
-
-fun resolveProperty(envVarKey: String, projectPropKey: String): String? {
-    val propValue = System.getenv(envVarKey)
-    if (propValue != null) {
-        return propValue
-    }
-
-    return findProperty(projectPropKey)?.toString()
 }

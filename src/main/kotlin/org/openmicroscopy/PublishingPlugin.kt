@@ -23,6 +23,7 @@ package org.openmicroscopy
 
 import groovy.lang.GroovyObject
 import groovy.util.Node
+import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.XmlProvider
@@ -30,6 +31,7 @@ import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.publish.PublishingExtension
+import org.gradle.api.publish.maven.MavenPom
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.publish.maven.plugins.MavenPublishPlugin
 import org.gradle.api.tasks.bundling.Jar
@@ -104,25 +106,31 @@ class PublishingPlugin : Plugin<Project> {
             }
 
             publications {
+                create<MavenPublication>("${camelCaseName()}Binary") {
+                    plugins.withType<JavaPlugin> {
+                        from(components["java"])
+                    }
+                    pom(standardPom())
+                }
+
+                create<MavenPublication>("${camelCaseName()}BinaryAndSources") {
+                    plugins.withType<JavaPlugin> {
+                        from(components["java"])
+                        artifact(tasks.getByName("sourcesJar"))
+                    }
+                    pom(standardPom())
+                }
+
                 create<MavenPublication>(camelCaseName()) {
                     plugins.withType<JavaPlugin> {
                         from(components["java"])
                         artifact(tasks.getByName("sourcesJar"))
                         artifact(tasks.getByName("javadocJar"))
                     }
-
                     plugins.withType<GroovyPlugin> {
                         artifact(tasks.getByName("groovydocJar"))
                     }
-
-                    pom {
-                        licenseGnu2()
-                        afterEvaluate {
-                            withXml {
-                                repositoriesXml(this)
-                            }
-                        }
-                    }
+                    pom(standardPom())
                 }
             }
         }
@@ -158,4 +166,15 @@ class PublishingPlugin : Plugin<Project> {
         return repositoriesNode
     }
 
+    private
+    fun Project.standardPom(): Action<in MavenPom>? {
+        return Action {
+            licenseGnu2()
+            afterEvaluate {
+                withXml {
+                    repositoriesXml(this)
+                }
+            }
+        }
+    }
 }
