@@ -15,9 +15,13 @@ repositories {
     jcenter()
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
 dependencies {
     implementation(kotlin("gradle-plugin"))
-    implementation("com.squareup:javapoet:1.11.1")
     implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3")
     implementation("org.ajoberstar:grgit:1.9.1") {
         setForce(true)
