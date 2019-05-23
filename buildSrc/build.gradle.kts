@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "org.openmicroscopy"
-version = "5.5.1"
+version = "5.5.2-SNAPSHOT"
 
 kotlinDslPluginOptions {
     experimentalWarning.set(false)
