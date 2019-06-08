@@ -1,9 +1,8 @@
-package org.openmicroscopy
+package org.openmicroscopy.dsl
 
 import org.gradle.api.publish.maven.MavenPom
 
-// Note: this should be copied to build.gradle.kts to ensure this plugin can publish itself
-class PluginHelper {
+class MavenPomExtensions {
     companion object {
         fun MavenPom.licenseGnu2() = licenses {
             license {
@@ -14,4 +13,3 @@ class PluginHelper {
         }
     }
 }
-

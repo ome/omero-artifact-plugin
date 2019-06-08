@@ -24,10 +24,10 @@ package org.openmicroscopy
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.repositories
-import org.openmicroscopy.PluginHelper.Companion.createArtifactoryMavenRepo
-import org.openmicroscopy.PluginHelper.Companion.createGitlabMavenRepo
-import org.openmicroscopy.PluginHelper.Companion.createStandardMavenRepo
-import org.openmicroscopy.PluginHelper.Companion.safeAdd
+import org.openmicroscopy.dsl.ProjectExtensions.Companion.createArtifactoryMavenRepo
+import org.openmicroscopy.dsl.ProjectExtensions.Companion.createGitlabMavenRepo
+import org.openmicroscopy.dsl.ProjectExtensions.Companion.createStandardMavenRepo
+import org.openmicroscopy.dsl.RepositoryHandlerExtensions.Companion.safeAdd
 import java.net.URI
 
 class AdditionalRepositoriesPlugin : Plugin<Project> {
