@@ -1,7 +1,7 @@
 plugins {
     `kotlin-dsl`
     `java-gradle-plugin`
-    org.openmicroscopy.`plugin-project`
+    id("org.openmicroscopy.plugin-project")
 }
 
 group = "org.openmicroscopy"
@@ -22,6 +22,7 @@ java {
 
 dependencies {
     implementation(kotlin("gradle-plugin"))
+    implementation(fileTree("$projectDir/buildSrc/build") { include("**/*.jar") })
     implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3")
     implementation("org.ajoberstar:grgit:1.9.1") {
         setForce(true)
@@ -61,4 +62,23 @@ gradlePlugin {
             implementationClass = "org.openmicroscopy.ReleasePlugin"
         }
     }
+}
+
+tasks.create("printDeps") {
+    doLast {
+        configurations.runtimeClasspath.get().files.forEach {
+            println(it)
+        }
+    }
+}
+
+tasks.jar {
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter {
+            it.name.contains("omero-plugin")
+        }.map {
+            zipTree(it)
+        }
+    })
 }
