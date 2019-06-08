@@ -64,13 +64,13 @@ gradlePlugin {
     }
 }
 
-tasks.create("printDeps") {
-    doLast {
-        configurations.runtimeClasspath.get().files.forEach {
-            println(it)
-        }
-    }
-}
+//tasks.create("printDeps") {
+//    doLast {
+//        configurations.runtimeClasspath.get().files.forEach {
+//            println(it)
+//        }
+//    }
+//}
 
 tasks.jar {
     dependsOn(configurations.runtimeClasspath)
