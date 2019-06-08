@@ -7,6 +7,8 @@ import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.credentials.HttpHeaderCredentials
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.authentication.http.HttpHeaderAuthentication
+import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.credentials
 import java.net.URI
 
@@ -51,6 +53,7 @@ class ProjectExtensions {
                         value = resolveProperty("GITLAB_TOKEN", "gitlabToken")
                     }
                 })
+                authentication.create("header", HttpHeaderAuthentication::class)
             }
         }
 
