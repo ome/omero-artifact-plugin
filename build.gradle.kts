@@ -22,13 +22,14 @@ java {
 
 dependencies {
     implementation(kotlin("gradle-plugin"))
-    implementation(fileTree("$projectDir/buildSrc/build") { include("**/*.jar") })
     implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3")
     implementation("org.ajoberstar:grgit:1.9.1") {
         setForce(true)
     }
     implementation("org.ajoberstar:gradle-git:1.7.1")
     implementation("org.ajoberstar:gradle-git-publish:0.3.3")
+
+    api(files("$projectDir/buildSrc/build/libs/omero-plugin.jar"))
 }
 
 gradlePlugin {
@@ -71,14 +72,19 @@ gradlePlugin {
 //        }
 //    }
 //}
-
 tasks.jar {
     dependsOn(configurations.runtimeClasspath)
     from({
-        configurations.runtimeClasspath.get().filter {
-            it.name.contains("omero-plugin")
-        }.map {
-            zipTree(it)
-        }
+        configurations.runtimeClasspath.get().filter { it.name.contains("omero-plugin") }.map { zipTree(it) }
     })
 }
+//tasks.jar {
+//    dependsOn(configurations.runtimeClasspath)
+//    from({
+//        configurations.runtimeClasspath.get().filter {
+//            it.name.contains("omero-plugin")
+//        }.map {
+//            zipTree(it)
+//        }
+//    })
+//}

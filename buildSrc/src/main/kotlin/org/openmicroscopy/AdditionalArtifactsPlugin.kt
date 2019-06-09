@@ -16,29 +16,30 @@ import org.gradle.kotlin.dsl.*
 
 class AdditionalArtifactsPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
-        plugins.withType<JavaPlugin> {
-            val sourceSets = the<SourceSetContainer>()
+        // Minimally, this plugin requires the java plugin
+        apply<JavaPlugin>()
 
-            val javadoc by tasks.named<Javadoc>("javadoc") {
-                // Configure java doc options
-                val stdOpts = options as StandardJavadocDocletOptions
-                stdOpts.addStringOption("Xdoclint:none", "-quiet")
-                if (JavaVersion.current().isJava9Compatible) {
-                    stdOpts.addBooleanOption("html5", true)
-                }
-            }
+        val sourceSets = the<SourceSetContainer>()
 
-            tasks.register<Jar>("sourcesJar") {
-                description = "Creates a jar of java sources, classified -sources"
-                archiveClassifier.set("sources")
-                from(sourceSets[SourceSet.MAIN_SOURCE_SET_NAME].allSource)
+        val javadoc by tasks.named<Javadoc>("javadoc") {
+            // Configure java doc options
+            val stdOpts = options as StandardJavadocDocletOptions
+            stdOpts.addStringOption("Xdoclint:none", "-quiet")
+            if (JavaVersion.current().isJava9Compatible) {
+                stdOpts.addBooleanOption("html5", true)
             }
+        }
 
-            tasks.register<Jar>("javadocJar") {
-                description = "Creates a jar of java docs, classified -javadoc"
-                archiveClassifier.set("javadoc")
-                from(javadoc)
-            }
+        tasks.register<Jar>("sourcesJar") {
+            description = "Creates a jar of java sources, classified -sources"
+            archiveClassifier.set("sources")
+            from(sourceSets[SourceSet.MAIN_SOURCE_SET_NAME].allSource)
+        }
+
+        tasks.register<Jar>("javadocJar") {
+            description = "Creates a jar of java docs, classified -javadoc"
+            archiveClassifier.set("javadoc")
+            from(javadoc)
         }
 
         plugins.withType<GroovyPlugin> {

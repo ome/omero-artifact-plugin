@@ -12,7 +12,7 @@ import org.gradle.plugin.devel.plugins.JavaGradlePluginPlugin
 import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
 import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
-import org.openmicroscopy.PluginHelper.Companion.licenseGnu2
+import org.openmicroscopy.dsl.MavenPomExtensions.Companion.licenseGnu2
 import org.openmicroscopy.dsl.ProjectExtensions.Companion.createArtifactoryMavenRepo
 import org.openmicroscopy.dsl.ProjectExtensions.Companion.createGitlabMavenRepo
 import org.openmicroscopy.dsl.ProjectExtensions.Companion.createStandardMavenRepo
@@ -46,11 +46,14 @@ class PluginPublishingPlugin : Plugin<Project> {
 
                 // pluginMaven is task created by MavenPluginPublishPlugin
                 publications.getByName<MavenPublication>("pluginMaven") {
-                    artifact(tasks.getByName("sourcesJar"))
-                    artifact(tasks.getByName("javadocJar"))
+                    // Add sources and docs to the publication
+                    plugins.withType<AdditionalArtifactsPlugin> {
+                        artifact(tasks["sourcesJar"])
+                        artifact(tasks["javadocJar"])
 
-                    plugins.withType<GroovyPlugin> {
-                        artifact(tasks.getByName("groovydocJar"))
+                        plugins.withType<GroovyPlugin> {
+                            artifact(tasks["groovydocJar"])
+                        }
                     }
 
                     pom {

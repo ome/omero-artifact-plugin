@@ -41,7 +41,7 @@ import org.gradle.kotlin.dsl.*
 import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
 import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
-import org.openmicroscopy.PluginHelper.Companion.licenseGnu2
+import org.openmicroscopy.dsl.MavenPomExtensions.Companion.licenseGnu2
 import org.openmicroscopy.dsl.ProjectExtensions.Companion.camelCaseName
 import org.openmicroscopy.dsl.ProjectExtensions.Companion.createArtifactoryMavenRepo
 import org.openmicroscopy.dsl.ProjectExtensions.Companion.createGitlabMavenRepo
@@ -109,26 +109,29 @@ class PublishingPlugin : Plugin<Project> {
             }
 
             publications {
-                // Publication meant for development, skips any doc generation
-                create<MavenPublication>("${camelCaseName()}BinaryAndSources") {
-                    plugins.withType<JavaPlugin> {
+                if (plugins.hasPlugin(AdditionalArtifactsPlugin::class)) {
+                    // Publication meant for development, skips any doc generation
+                    create<MavenPublication>("${camelCaseName()}BinaryAndSources") {
                         from(components["java"])
-                        artifact(tasks.getByName("sourcesJar"))
+                        artifact(tasks["sourcesJar"])
+                        pom(standardPom())
                     }
-                    pom(standardPom())
-                }
 
-                // Publication meant for production and includes docs
-                create<MavenPublication>(camelCaseName()) {
-                    plugins.withType<JavaPlugin> {
+                    // Publication meant for production and includes docs
+                    create<MavenPublication>(camelCaseName()) {
                         from(components["java"])
-                        artifact(tasks.getByName("sourcesJar"))
-                        artifact(tasks.getByName("javadocJar"))
+                        artifact(tasks["sourcesJar"])
+                        artifact(tasks["javadocJar"])
+                        plugins.withType<GroovyPlugin> {
+                            artifact(tasks["groovydocJar"])
+                        }
+                        pom(standardPom())
                     }
-                    plugins.withType<GroovyPlugin> {
-                        artifact(tasks.getByName("groovydocJar"))
+                } else {
+                    create<MavenPublication>(camelCaseName()) {
+                        from(components["java"])
+                        pom(standardPom())
                     }
-                    pom(standardPom())
                 }
             }
         }
@@ -136,22 +139,24 @@ class PublishingPlugin : Plugin<Project> {
 
     private
     fun Project.configurePublishTasks() {
-        val publishing = the<PublishingExtension>()
+        if (plugins.hasPlugin(AdditionalArtifactsPlugin::class)) {
+            val publishing = the<PublishingExtension>()
 
-        // ToDo: make this a configurable list from child projects
-        val formalRepos =
-                listOf(publishing.repositories["artifactory"], publishing.repositories["maven"])
+            tasks.withType<PublishToMavenRepository>().configureEach {
+                onlyIf {
+                    // ToDo: make this a configurable list from child projects
+                    val formalRepos =
+                            listOf(publishing.repositories["artifactory"], publishing.repositories["maven"])
 
-        tasks.withType<PublishToMavenRepository>().configureEach {
-            onlyIf {
-                (formalRepos.contains(repository) &&
-                        publication == publishing.publications[camelCaseName()]) ||
-                        (publication == publishing.publications["${camelCaseName()}BinaryAndSources"])
+                    (formalRepos.contains(repository) &&
+                            publication == publishing.publications[camelCaseName()]) ||
+                            (publication == publishing.publications["${camelCaseName()}BinaryAndSources"])
+                }
             }
-        }
-        tasks.withType<PublishToMavenLocal>().configureEach {
-            onlyIf {
-                publication == publishing.publications["${camelCaseName()}BinaryAndSources"]
+            tasks.withType<PublishToMavenLocal>().configureEach {
+                onlyIf {
+                    publication == publishing.publications["${camelCaseName()}BinaryAndSources"]
+                }
             }
         }
     }
