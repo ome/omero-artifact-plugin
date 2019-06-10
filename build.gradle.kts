@@ -1,4 +1,5 @@
 plugins {
+    groovy
     `kotlin-dsl`
     `java-gradle-plugin`
     id("org.openmicroscopy.plugin-project")
@@ -34,6 +35,7 @@ dependencies {
 
 gradlePlugin {
     plugins {
+        // Java/Groovy/Kotlin Project plugins
         register("project-plugin") {
             id = "org.openmicroscopy.project"
             implementationClass = "org.openmicroscopy.ProjectPlugin"
@@ -50,6 +52,8 @@ gradlePlugin {
             id = "org.openmicroscopy.publishing"
             implementationClass = "org.openmicroscopy.PublishingPlugin"
         }
+
+        // Plugins for gradle plugins
         register("plugin-project-plugin") {
             id = "org.openmicroscopy.plugin-project"
             implementationClass = "org.openmicroscopy.PluginProjectPlugin"
@@ -58,6 +62,12 @@ gradlePlugin {
             id = "org.openmicroscopy.plugin-publishing"
             implementationClass = "org.openmicroscopy.PluginPublishingPlugin"
         }
+
+        // Used by both
+        register("functional-test-plugin") {
+            id = "org.openmicroscopy.functional-test"
+            implementationClass = "org.openmicroscopy.FunctionalTestPlugin"
+        }
         register("release-plugin") {
             id = "org.openmicroscopy.release"
             implementationClass = "org.openmicroscopy.ReleasePlugin"
@@ -65,26 +75,14 @@ gradlePlugin {
     }
 }
 
-//tasks.create("printDeps") {
-//    doLast {
-//        configurations.runtimeClasspath.get().files.forEach {
-//            println(it)
-//        }
-//    }
-//}
+// We need this to pull in compiled classes from the buildSrc jar.
 tasks.jar {
     dependsOn(configurations.runtimeClasspath)
     from({
-        configurations.runtimeClasspath.get().filter { it.name.contains("omero-plugin") }.map { zipTree(it) }
+        configurations.runtimeClasspath.get().filter {
+            it.name.contains("omero-plugin")
+        }.map {
+            zipTree(it)
+        }
     })
 }
-//tasks.jar {
-//    dependsOn(configurations.runtimeClasspath)
-//    from({
-//        configurations.runtimeClasspath.get().filter {
-//            it.name.contains("omero-plugin")
-//        }.map {
-//            zipTree(it)
-//        }
-//    })
-//}
