@@ -23,7 +23,7 @@ package org.openmicroscopy
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.kotlin.dsl.repositories
+import org.gradle.kotlin.dsl.*
 import org.openmicroscopy.dsl.ProjectExtensions.Companion.createArtifactoryMavenRepo
 import org.openmicroscopy.dsl.ProjectExtensions.Companion.createGitlabMavenRepo
 import org.openmicroscopy.dsl.ProjectExtensions.Companion.createStandardMavenRepo

@@ -8,8 +8,7 @@ import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.credentials.HttpHeaderCredentials
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.authentication.http.HttpHeaderAuthentication
-import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.credentials
+import org.gradle.kotlin.dsl.*
 import java.net.URI
 
 class ProjectExtensions {
@@ -21,11 +20,11 @@ class ProjectExtensions {
             return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, name)
         }
 
-        fun Project.createArtifactoryMavenRepo(): MavenArtifactRepository? {
+        fun Project.createArtifactoryMavenRepo(): Action<MavenArtifactRepository>? {
             val artiUrl = resolveProperty("ARTIFACTORY_URL", "artifactoryUrl")
                     ?: return null
 
-            return repositories.maven {
+            return Action {
                 name = "artifactory"
                 url = URI.create(artiUrl)
                 credentials {
@@ -35,29 +34,29 @@ class ProjectExtensions {
             }
         }
 
-        fun Project.createGitlabMavenRepo(): MavenArtifactRepository? {
+        fun Project.createGitlabMavenRepo(): Action<MavenArtifactRepository>? {
             val gitlabUrl = resolveProperty("GITLAB_URL", "gitlabUrl")
                     ?: return null
 
-            return repositories.maven {
-                name = "gitlab"
-                url = URI.create(gitlabUrl)
+            return Action {
+                this.name = "gitlab"
+                this.url = URI.create(gitlabUrl)
                 credentials(HttpHeaderCredentials::class, Action {
                     // Token specified by
                     val jobToken = System.getenv("CI_JOB_TOKEN")
                     if (jobToken != null) {
-                        name = "Job-Token"
-                        value = jobToken
+                        this.name = "Job-Token"
+                        this.value = jobToken
                     } else {
-                        name = "Private-Token"
-                        value = resolveProperty("GITLAB_TOKEN", "gitlabToken")
+                        this.name = "Private-Token"
+                        this.value = resolveProperty("GITLAB_TOKEN", "gitlabToken")
                     }
                 })
                 authentication.create("header", HttpHeaderAuthentication::class)
             }
         }
 
-        fun Project.createStandardMavenRepo(): MavenArtifactRepository? {
+        fun Project.createStandardMavenRepo(): Action<MavenArtifactRepository>? {
             val releasesRepoUrl =
                     resolveProperty("MAVEN_RELEASES_REPO_URL", "mavenReleasesRepoUrl")
             val snapshotsRepoUrl =
@@ -66,9 +65,9 @@ class ProjectExtensions {
             val chosenUrl =
                     (if (hasProperty("release")) releasesRepoUrl else snapshotsRepoUrl) ?: return null
 
-            return repositories.maven {
-                url = URI.create(chosenUrl)
+            return Action {
                 name = "maven"
+                url = URI.create(chosenUrl)
                 credentials {
                     username = resolveProperty("MAVEN_USER", "mavenUser")
                     password = resolveProperty("MAVEN_PASSWORD", "mavenPassword")

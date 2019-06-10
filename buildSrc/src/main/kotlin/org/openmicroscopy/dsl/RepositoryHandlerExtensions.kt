@@ -1,7 +1,9 @@
 package org.openmicroscopy.dsl
 
+import org.gradle.api.Action
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.ArtifactRepository
+import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 
 class RepositoryHandlerExtensions {
     companion object {
@@ -10,6 +12,13 @@ class RepositoryHandlerExtensions {
                 return add(repository)
             }
             return false
+        }
+
+        fun RepositoryHandler.safeAdd(repository: Action<in MavenArtifactRepository>?): MavenArtifactRepository? {
+            if (repository != null) {
+                return maven(repository)
+            }
+            return null
         }
     }
 }
