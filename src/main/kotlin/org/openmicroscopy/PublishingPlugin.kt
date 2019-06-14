@@ -27,6 +27,7 @@ import org.gradle.api.Action
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.XmlProvider
+import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.plugins.GroovyPlugin
 import org.gradle.api.plugins.JavaPlugin
@@ -141,14 +142,16 @@ class PublishingPlugin : Plugin<Project> {
     fun Project.configurePublishTasks() {
         if (plugins.hasPlugin(AdditionalArtifactsPlugin::class)) {
             val publishing = the<PublishingExtension>()
+            val reposList = ArrayList<ArtifactRepository>()
+            listOf("artifactory", "maven").forEach {
+                val repo = publishing.repositories.findByName(it)
+                if (repo != null) reposList.add(repo)
+            }
 
             tasks.withType<PublishToMavenRepository>().configureEach {
                 onlyIf {
                     // ToDo: make this a configurable list from child projects
-                    val formalRepos =
-                            listOf(publishing.repositories["artifactory"], publishing.repositories["maven"])
-
-                    (formalRepos.contains(repository) &&
+                    (reposList.contains(repository) &&
                             publication == publishing.publications[camelCaseName()]) ||
                             (publication == publishing.publications["${camelCaseName()}BinaryAndSources"])
                 }

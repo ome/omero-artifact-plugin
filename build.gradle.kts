@@ -6,7 +6,7 @@ plugins {
 }
 
 group = "org.openmicroscopy"
-version = "5.5.2-SNAPSHOT"
+version = "5.5.3"
 
 kotlinDslPluginOptions {
     experimentalWarning.set(false)
@@ -30,7 +30,9 @@ dependencies {
     implementation("org.ajoberstar:gradle-git:1.7.1")
     implementation("org.ajoberstar:gradle-git-publish:0.3.3")
 
-    api(files("$projectDir/buildSrc/build/libs/omero-plugin.jar"))
+    api(fileTree("$projectDir/buildSrc/build/libs").matching {
+        include("*.jar")
+    })
 }
 
 gradlePlugin {
@@ -75,12 +77,31 @@ gradlePlugin {
     }
 }
 
+tasks.create("printJars") {
+    doLast {
+        configurations.runtimeClasspath.get().forEach() {
+            println(it.name)
+        }
+    }
+}
+
 // We need this to pull in compiled classes from the buildSrc jar.
 tasks.jar {
     dependsOn(configurations.runtimeClasspath)
     from({
         configurations.runtimeClasspath.get().filter {
-            it.name.contains("omero-plugin")
+            it.name == "omero-plugin.jar"
+        }.map {
+            zipTree(it)
+        }
+    })
+}
+
+tasks.sourcesJar {
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get().filter {
+            it.name == "omero-plugin-sources.jar"
         }.map {
             zipTree(it)
         }

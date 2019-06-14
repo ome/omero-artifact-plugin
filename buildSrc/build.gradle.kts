@@ -31,3 +31,13 @@ gradlePlugin {
         }
     }
 }
+
+val sourcesJar by tasks.registering(Jar::class) {
+    description = "Creates a jar of java sources, classified -sources"
+    archiveClassifier.set("sources")
+    from(sourceSets[SourceSet.MAIN_SOURCE_SET_NAME].allSource)
+}
+
+tasks.named("assemble") {
+    dependsOn(sourcesJar)
+}
