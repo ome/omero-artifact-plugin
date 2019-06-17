@@ -60,8 +60,13 @@ class PublishingPlugin : Plugin<Project> {
         applyPublishingPlugin()
         configureManifest()
         configureArtifactoryExtension()
-        configurePublishingExtension()
-        configurePublishTasks()
+
+        if (plugins.hasPlugin(AdditionalArtifactsPlugin::class)) {
+            configurePublishingExtension()
+            configurePublishTasks()
+        } else {
+            configurePublishingExtensionSimple()
+        }
     }
 
     private
@@ -110,29 +115,41 @@ class PublishingPlugin : Plugin<Project> {
             }
 
             publications {
-                if (plugins.hasPlugin(AdditionalArtifactsPlugin::class)) {
-                    // Publication meant for development, skips any doc generation
-                    create<MavenPublication>("${camelCaseName()}BinaryAndSources") {
-                        from(components["java"])
-                        artifact(tasks["sourcesJar"])
-                        pom(standardPom())
-                    }
+                // Publication meant for development, skips any doc generation
+                create<MavenPublication>("${camelCaseName()}BinaryAndSources") {
+                    from(components["java"])
+                    artifact(tasks["sourcesJar"])
+                    pom(standardPom())
+                }
 
-                    // Publication meant for production and includes docs
-                    create<MavenPublication>(camelCaseName()) {
-                        from(components["java"])
-                        artifact(tasks["sourcesJar"])
-                        artifact(tasks["javadocJar"])
-                        plugins.withType<GroovyPlugin> {
-                            artifact(tasks["groovydocJar"])
-                        }
-                        pom(standardPom())
+                // Publication meant for production and includes docs
+                create<MavenPublication>(camelCaseName()) {
+                    from(components["java"])
+                    artifact(tasks["sourcesJar"])
+                    artifact(tasks["javadocJar"])
+                    plugins.withType<GroovyPlugin> {
+                        artifact(tasks["groovydocJar"])
                     }
-                } else {
-                    create<MavenPublication>(camelCaseName()) {
-                        from(components["java"])
-                        pom(standardPom())
-                    }
+                    pom(standardPom())
+                }
+            }
+        }
+    }
+
+    private
+    fun Project.configurePublishingExtensionSimple() {
+        configure<PublishingExtension> {
+            repositories {
+                safeAdd(createArtifactoryMavenRepo())
+                safeAdd(createGitlabMavenRepo())
+                safeAdd(createStandardMavenRepo())
+            }
+
+            publications {
+                // Publication meant for production and includes docs
+                create<MavenPublication>(camelCaseName()) {
+                    from(components["java"])
+                    pom(standardPom())
                 }
             }
         }
@@ -140,26 +157,24 @@ class PublishingPlugin : Plugin<Project> {
 
     private
     fun Project.configurePublishTasks() {
-        if (plugins.hasPlugin(AdditionalArtifactsPlugin::class)) {
-            val publishing = the<PublishingExtension>()
-            val reposList = ArrayList<ArtifactRepository>()
-            listOf("artifactory", "maven").forEach {
-                val repo = publishing.repositories.findByName(it)
-                if (repo != null) reposList.add(repo)
-            }
+        val publishing = the<PublishingExtension>()
+        val reposList = ArrayList<ArtifactRepository>()
+        listOf("artifactory", "maven").forEach {
+            val repo = publishing.repositories.findByName(it)
+            if (repo != null) reposList.add(repo)
+        }
 
-            tasks.withType<PublishToMavenRepository>().configureEach {
-                onlyIf {
-                    // ToDo: make this a configurable list from child projects
-                    (reposList.contains(repository) &&
-                            publication == publishing.publications[camelCaseName()]) ||
-                            (publication == publishing.publications["${camelCaseName()}BinaryAndSources"])
-                }
+        tasks.withType<PublishToMavenRepository>().configureEach {
+            onlyIf {
+                // ToDo: make this a configurable list from child projects
+                (reposList.contains(repository) &&
+                        publication == publishing.publications[camelCaseName()]) ||
+                        (publication == publishing.publications["${camelCaseName()}BinaryAndSources"])
             }
-            tasks.withType<PublishToMavenLocal>().configureEach {
-                onlyIf {
-                    publication == publishing.publications["${camelCaseName()}BinaryAndSources"]
-                }
+        }
+        tasks.withType<PublishToMavenLocal>().configureEach {
+            onlyIf {
+                publication == publishing.publications["${camelCaseName()}BinaryAndSources"]
             }
         }
     }
