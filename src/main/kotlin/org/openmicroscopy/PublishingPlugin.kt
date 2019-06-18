@@ -52,7 +52,6 @@ import org.openmicroscopy.dsl.ProjectExtensions.Companion.resolveProperty
 import org.openmicroscopy.dsl.RepositoryHandlerExtensions.Companion.safeAdd
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.set
 
 
 class PublishingPlugin : Plugin<Project> {
@@ -63,7 +62,6 @@ class PublishingPlugin : Plugin<Project> {
 
         if (plugins.hasPlugin(AdditionalArtifactsPlugin::class)) {
             configurePublishingExtension()
-            configurePublishTasks()
         } else {
             configurePublishingExtensionSimple()
         }
@@ -91,15 +89,8 @@ class PublishingPlugin : Plugin<Project> {
     fun Project.configureManifest() {
         plugins.withType<JavaPlugin> {
             tasks.named<Jar>("jar") {
-                manifest {
-                    attributes["Implementation-Title"] = name.replace(Regex("[^A-Za-z0-9]"), "")
-                    attributes["Implementation-Version"] = project.version
-                    attributes["Built-By"] = System.getProperty("user.name")
-                    attributes["Built-Date"] = SimpleDateFormat("dd/MM/yyyy").format(Date())
-                    attributes["Built-JDK"] = System.getProperty("java.version")
-                    attributes["Built-Gradle"] = gradle.gradleVersion
-                    attributes["Class-Path"] = getRuntimeClasspathConfiguration()
-                            ?.joinToString(separator = " ") { it.name }
+                doFirst {
+                    manifest.attributes.putAll(basicManifest())
                 }
             }
         }
@@ -116,21 +107,24 @@ class PublishingPlugin : Plugin<Project> {
 
             publications {
                 // Publication meant for development, skips any doc generation
-                create<MavenPublication>("${camelCaseName()}BinaryAndSources") {
-                    from(components["java"])
-                    artifact(tasks["sourcesJar"])
-                    pom(standardPom())
-                }
-
-                // Publication meant for production and includes docs
-                create<MavenPublication>(camelCaseName()) {
-                    from(components["java"])
-                    artifact(tasks["sourcesJar"])
-                    artifact(tasks["javadocJar"])
-                    plugins.withType<GroovyPlugin> {
-                        artifact(tasks["groovydocJar"])
+                val devPublish = resolveProperty("DEVELOPER_PUBLISH", "developerPublish")
+                if (devPublish != null && devPublish.toBoolean()) {
+                    create<MavenPublication>(camelCaseName()) {
+                        from(components["java"])
+                        artifact(tasks["sourcesJar"])
+                        pom(standardPom())
                     }
-                    pom(standardPom())
+                } else {
+                    // Publication meant for production and includes docs
+                    create<MavenPublication>(camelCaseName()) {
+                        from(components["java"])
+                        artifact(tasks["sourcesJar"])
+                        artifact(tasks["javadocJar"])
+                        plugins.withType<GroovyPlugin> {
+                            artifact(tasks["groovydocJar"])
+                        }
+                        pom(standardPom())
+                    }
                 }
             }
         }
@@ -151,30 +145,6 @@ class PublishingPlugin : Plugin<Project> {
                     from(components["java"])
                     pom(standardPom())
                 }
-            }
-        }
-    }
-
-    private
-    fun Project.configurePublishTasks() {
-        val publishing = the<PublishingExtension>()
-        val reposList = ArrayList<ArtifactRepository>()
-        listOf("artifactory", "maven").forEach {
-            val repo = publishing.repositories.findByName(it)
-            if (repo != null) reposList.add(repo)
-        }
-
-        tasks.withType<PublishToMavenRepository>().configureEach {
-            onlyIf {
-                // ToDo: make this a configurable list from child projects
-                (reposList.contains(repository) &&
-                        publication == publishing.publications[camelCaseName()]) ||
-                        (publication == publishing.publications["${camelCaseName()}BinaryAndSources"])
-            }
-        }
-        tasks.withType<PublishToMavenLocal>().configureEach {
-            onlyIf {
-                publication == publishing.publications["${camelCaseName()}BinaryAndSources"]
             }
         }
     }
@@ -220,4 +190,15 @@ class PublishingPlugin : Plugin<Project> {
             }
         }
     }
+
+    private
+    fun Project.basicManifest(): Map<String, Any?> {
+        return linkedMapOf("Implementation-Title" to project.name.replace("[^A-Za-z0-9]", ""),
+                "Implementation-Version" to project.version,
+                "Built-Date" to SimpleDateFormat("dd/MM/yyyy").format(Date()),
+                "Built-JDK" to System.getProperty("java.version"),
+                "Built-Gradle" to project.gradle.gradleVersion,
+                "Class-Path" to getRuntimeClasspathConfiguration()?.joinToString(separator = " ") { it.name })
+    }
+
 }
