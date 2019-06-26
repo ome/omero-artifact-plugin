@@ -21,6 +21,7 @@ repositories {
 dependencies {
     implementation(kotlin("gradle-plugin"))
     implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3")
+    implementation("org.ajoberstar.reckon:reckon-gradle:0.11.0")
 }
 
 gradlePlugin {

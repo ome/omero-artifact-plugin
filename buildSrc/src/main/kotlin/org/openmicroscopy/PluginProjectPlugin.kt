@@ -9,5 +9,6 @@ class PluginProjectPlugin : Plugin<Project> {
         apply<AdditionalArtifactsPlugin>()
         apply<PluginPublishingPlugin>()
         apply<FunctionalTestPlugin>()
+        apply<ReleasePlugin>()
     }
 }
