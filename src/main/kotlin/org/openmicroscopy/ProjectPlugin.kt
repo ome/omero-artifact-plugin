@@ -30,5 +30,6 @@ class ProjectPlugin : Plugin<Project> {
         apply<AdditionalRepositoriesPlugin>()
         apply<AdditionalArtifactsPlugin>()
         apply<PublishingPlugin>()
+        // apply<ReleasePlugin>()
     }
 }
