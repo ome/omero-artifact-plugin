@@ -22,7 +22,6 @@
 package org.openmicroscopy
 
 import org.ajoberstar.grgit.Grgit
-import org.ajoberstar.grgit.gradle.GrgitPlugin
 import org.ajoberstar.reckon.gradle.ReckonExtension
 import org.ajoberstar.reckon.gradle.ReckonPlugin
 import org.gradle.api.GradleException
@@ -38,7 +37,6 @@ class ReleasePlugin : Plugin<Project> {
 
     private
     fun Project.applyReckonPlugin() {
-        apply<GrgitPlugin>()
         apply<ReckonPlugin>()
     }
 
@@ -73,7 +71,7 @@ class ReleasePlugin : Plugin<Project> {
         }
 
         tasks.matching { it.name == "check" }.configureEach {
-            tasks.getByName(ReckonPlugin.TAG_TASK).dependsOn(tagTask)
+            tagTask.get().dependsOn(this)
         }
     }
 }
