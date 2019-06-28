@@ -47,10 +47,12 @@ class ReleasePlugin : Plugin<Project> {
             stageFromProp("alpha", "beta", "rc", "final")
         }
 
-        val tagTask = tasks.named(ReckonPlugin.TAG_TASK)
+        // set default to patch, saying as that's what we tend to
+        // work towards first
+        extra["reckon.scope"] = "patch"
 
         // safety checks before releasing
-        tagTask.configure {
+        tasks.named(ReckonPlugin.TAG_TASK).configure {
             doFirst {
                 val grgit = (project.findProperty("grgit")
                         ?: throw GradleException("Can't find grgit")) as Grgit
@@ -71,7 +73,7 @@ class ReleasePlugin : Plugin<Project> {
         }
 
         tasks.matching { it.name == "check" }.configureEach {
-            tagTask.get().dependsOn(this)
+            tasks.getByName(ReckonPlugin.TAG_TASK).dependsOn(this)
         }
     }
 }

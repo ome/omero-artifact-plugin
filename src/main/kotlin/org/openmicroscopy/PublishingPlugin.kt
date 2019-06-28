@@ -56,12 +56,7 @@ class PublishingPlugin : Plugin<Project> {
         applyPublishingPlugin()
         configureManifest()
         configureArtifactoryExtension()
-
-        if (plugins.hasPlugin(AdditionalArtifactsPlugin::class)) {
-            configurePublishingExtension()
-        } else {
-            configurePublishingExtensionSimple()
-        }
+        configurePublishingExtensionSimple()
     }
 
     private
@@ -94,40 +89,6 @@ class PublishingPlugin : Plugin<Project> {
     }
 
     private
-    fun Project.configurePublishingExtension() {
-        configure<PublishingExtension> {
-            repositories {
-                safeAdd(createArtifactoryMavenRepo())
-                safeAdd(createGitlabMavenRepo())
-                safeAdd(createStandardMavenRepo())
-            }
-
-            publications {
-                // Publication meant for development, skips any doc generation
-                val devPublish = resolveProperty("DEVELOPER_PUBLISH", "developerPublish")
-                if (devPublish != null && devPublish.toBoolean()) {
-                    create<MavenPublication>(camelCaseName()) {
-                        from(components["java"])
-                        artifact(tasks["sourcesJar"])
-                        pom(standardPom())
-                    }
-                } else {
-                    // Publication meant for production and includes docs
-                    create<MavenPublication>(camelCaseName()) {
-                        from(components["java"])
-                        artifact(tasks["sourcesJar"])
-                        artifact(tasks["javadocJar"])
-                        plugins.withType<GroovyPlugin> {
-                            artifact(tasks["groovydocJar"])
-                        }
-                        pom(standardPom())
-                    }
-                }
-            }
-        }
-    }
-
-    private
     fun Project.configurePublishingExtensionSimple() {
         configure<PublishingExtension> {
             repositories {
@@ -136,11 +97,24 @@ class PublishingPlugin : Plugin<Project> {
                 safeAdd(createStandardMavenRepo())
             }
 
-            publications {
-                // Publication meant for production and includes docs
-                create<MavenPublication>(camelCaseName()) {
-                    from(components["java"])
-                    pom(standardPom())
+            // Publication meant for production and includes docs
+            val publication = publications.create<MavenPublication>(camelCaseName()) {
+                from(components["java"])
+                pom(standardPom())
+            }
+
+            plugins.withType<AdditionalArtifactsPlugin> {
+                // Publication meant for development, skips any doc generation
+                val devPublish = resolveProperty("DEVELOPER_PUBLISH", "developerPublish")
+                if (devPublish != null && devPublish.toBoolean()) {
+                    publication.artifact(tasks["sourcesJar"])
+                } else {
+                    // Publication meant for production and includes docs
+                    publication.artifact(tasks["sourcesJar"])
+                    publication.artifact(tasks["javadocJar"])
+                    plugins.withType<GroovyPlugin> {
+                        publication.artifact(tasks["groovydocJar"])
+                    }
                 }
             }
         }

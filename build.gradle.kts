@@ -6,6 +6,7 @@ plugins {
 }
 
 group = "org.openmicroscopy"
+version = "5.5.3"
 
 kotlinDslPluginOptions {
     experimentalWarning.set(false)
@@ -65,10 +66,10 @@ gradlePlugin {
             id = "org.openmicroscopy.functional-test"
             implementationClass = "org.openmicroscopy.FunctionalTestPlugin"
         }
-//        register("release-plugin") {
-//            id = "org.openmicroscopy.release"
-//            implementationClass = "org.openmicroscopy.ReleasePlugin"
-//        }
+        register("release-plugin") {
+            id = "org.openmicroscopy.release"
+            implementationClass = "org.openmicroscopy.ReleasePlugin"
+        }
     }
 }
 
