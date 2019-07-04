@@ -6,13 +6,14 @@ plugins {
 }
 
 group = "org.openmicroscopy"
-version = "5.5.3"
+version = "5.5.2-SNAPSHOT"
 
 kotlinDslPluginOptions {
     experimentalWarning.set(false)
 }
 
 repositories {
+    mavenLocal()
     jcenter()
 }
 
@@ -22,13 +23,12 @@ java {
 }
 
 dependencies {
-    implementation(kotlin("gradle-plugin"))
-    implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3")
-    implementation("org.ajoberstar.reckon:reckon-gradle:0.11.0")
-
     api(fileTree("$projectDir/buildSrc/build/libs").matching {
         include("*.jar")
     })
+
+    implementation(kotlin("gradle-plugin"))
+    implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3")
 }
 
 gradlePlugin {
@@ -66,16 +66,12 @@ gradlePlugin {
             id = "org.openmicroscopy.functional-test"
             implementationClass = "org.openmicroscopy.FunctionalTestPlugin"
         }
-        register("release-plugin") {
-            id = "org.openmicroscopy.release"
-            implementationClass = "org.openmicroscopy.ReleasePlugin"
-        }
     }
 }
 
 tasks.create("printJars") {
     doLast {
-        configurations.runtimeClasspath.get().forEach() {
+        configurations.runtimeClasspath.get().forEach {
             println(it.name)
         }
     }
