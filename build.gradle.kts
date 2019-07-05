@@ -2,7 +2,9 @@ plugins {
     groovy
     `kotlin-dsl`
     `java-gradle-plugin`
-    id("org.openmicroscopy.plugin-project")
+    id("org.openmicroscopy.additional-artifacts")
+    id("org.openmicroscopy.additional-repositories")
+    id("org.openmicroscopy.publishing")
 }
 
 group = "org.openmicroscopy"
