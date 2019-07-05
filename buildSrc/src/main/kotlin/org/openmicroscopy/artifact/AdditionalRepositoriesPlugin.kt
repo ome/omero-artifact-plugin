@@ -19,15 +19,15 @@
  *
  * ------------------------------------------------------------------------------
  */
-package org.openmicroscopy
+package org.openmicroscopy.artifact
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.*
-import org.openmicroscopy.dsl.ProjectExtensions.Companion.createArtifactoryMavenRepo
-import org.openmicroscopy.dsl.ProjectExtensions.Companion.createGitlabMavenRepo
-import org.openmicroscopy.dsl.ProjectExtensions.Companion.createStandardMavenRepo
-import org.openmicroscopy.dsl.RepositoryHandlerExtensions.Companion.safeAdd
+import org.openmicroscopy.artifact.dsl.ProjectExtensions.Companion.createArtifactoryMavenRepo
+import org.openmicroscopy.artifact.dsl.ProjectExtensions.Companion.createGitlabMavenRepo
+import org.openmicroscopy.artifact.dsl.ProjectExtensions.Companion.createStandardMavenRepo
+import org.openmicroscopy.artifact.dsl.RepositoryHandlerExtensions.Companion.safeAdd
 import java.net.URI
 
 class AdditionalRepositoriesPlugin : Plugin<Project> {
@@ -36,15 +36,6 @@ class AdditionalRepositoriesPlugin : Plugin<Project> {
             safeAdd(createArtifactoryMavenRepo())
             safeAdd(createGitlabMavenRepo())
             safeAdd(createStandardMavenRepo())
-
-            maven {
-                name = "ome.maven"
-                url = URI.create("https://artifacts.openmicroscopy.org/artifactory/maven/")
-            }
-            maven {
-                name = "unidata"
-                url = URI.create("https://artifacts.unidata.ucar.edu/repository/unidata-all/")
-            }
         }
     }
 }

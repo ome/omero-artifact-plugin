@@ -1,4 +1,4 @@
-package org.openmicroscopy.dsl
+package org.openmicroscopy.artifact.dsl
 
 import org.gradle.api.publish.maven.MavenPom
 

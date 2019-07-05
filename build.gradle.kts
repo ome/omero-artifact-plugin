@@ -34,45 +34,33 @@ dependencies {
 gradlePlugin {
     plugins {
         // Java/Groovy/Kotlin Project plugins
-        register("project-plugin") {
-            id = "org.openmicroscopy.project"
-            implementationClass = "org.openmicroscopy.ProjectPlugin"
+        register("additional-artifacts-plugin") {
+            id = "org.openmicroscopy.additional-artifacts"
+            implementationClass = "org.openmicroscopy.AdditionalArtifactsPlugin"
         }
         register("additional-repositories-plugin") {
             id = "org.openmicroscopy.additional-repositories"
             implementationClass = "org.openmicroscopy.AdditionalRepositoriesPlugin"
         }
-        register("additional-artifacts-plugin") {
-            id = "org.openmicroscopy.additional-artifacts"
-            implementationClass = "org.openmicroscopy.AdditionalArtifactsPlugin"
+        register("functional-test-plugin") {
+            id = "org.openmicroscopy.functional-test"
+            implementationClass = "org.openmicroscopy.FunctionalTestPlugin"
         }
         register("publishing-plugin") {
             id = "org.openmicroscopy.publishing"
             implementationClass = "org.openmicroscopy.PublishingPlugin"
         }
-
-        // Plugins for gradle plugins
+        register("artifact-plugin") {
+            id = "org.openmicroscopy.artifact"
+            implementationClass = "org.openmicroscopy.ArtifactPlugin"
+        }
         register("plugin-project-plugin") {
             id = "org.openmicroscopy.plugin-project"
             implementationClass = "org.openmicroscopy.PluginProjectPlugin"
         }
-        register("plugin-publishing-plugin") {
-            id = "org.openmicroscopy.plugin-publishing"
-            implementationClass = "org.openmicroscopy.PluginPublishingPlugin"
-        }
-
-        // Used by both
-        register("functional-test-plugin") {
-            id = "org.openmicroscopy.functional-test"
-            implementationClass = "org.openmicroscopy.FunctionalTestPlugin"
-        }
-    }
-}
-
-tasks.create("printJars") {
-    doLast {
-        configurations.runtimeClasspath.get().forEach {
-            println(it.name)
+        register("project-plugin") {
+            id = "org.openmicroscopy.project"
+            implementationClass = "org.openmicroscopy.ProjectPlugin"
         }
     }
 }

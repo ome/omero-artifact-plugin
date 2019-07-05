@@ -1,4 +1,4 @@
-package org.openmicroscopy
+package org.openmicroscopy.artifact
 
 
 import org.gradle.api.JavaVersion

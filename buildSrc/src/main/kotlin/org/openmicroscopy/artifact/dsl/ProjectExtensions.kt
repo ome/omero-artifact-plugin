@@ -1,4 +1,4 @@
-package org.openmicroscopy.dsl
+package org.openmicroscopy.artifact.dsl
 
 import com.google.common.base.CaseFormat
 import org.gradle.api.Action
