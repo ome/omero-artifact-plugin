@@ -38,23 +38,23 @@ gradlePlugin {
         // Java/Groovy/Kotlin Project plugins
         register("additional-artifacts-plugin") {
             id = "org.openmicroscopy.additional-artifacts"
-            implementationClass = "org.openmicroscopy.AdditionalArtifactsPlugin"
+            implementationClass = "org.openmicroscopy.artifact.AdditionalArtifactsPlugin"
         }
         register("additional-repositories-plugin") {
             id = "org.openmicroscopy.additional-repositories"
-            implementationClass = "org.openmicroscopy.AdditionalRepositoriesPlugin"
+            implementationClass = "org.openmicroscopy.artifact.AdditionalRepositoriesPlugin"
         }
         register("functional-test-plugin") {
             id = "org.openmicroscopy.functional-test"
-            implementationClass = "org.openmicroscopy.FunctionalTestPlugin"
+            implementationClass = "org.openmicroscopy.artifact.FunctionalTestPlugin"
         }
         register("publishing-plugin") {
             id = "org.openmicroscopy.publishing"
-            implementationClass = "org.openmicroscopy.PublishingPlugin"
+            implementationClass = "org.openmicroscopy.artifact.PublishingPlugin"
         }
         register("artifact-plugin") {
             id = "org.openmicroscopy.artifact"
-            implementationClass = "org.openmicroscopy.ArtifactPlugin"
+            implementationClass = "org.openmicroscopy.artifact.ArtifactPlugin"
         }
         register("plugin-project-plugin") {
             id = "org.openmicroscopy.plugin-project"
