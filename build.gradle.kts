@@ -15,7 +15,6 @@ kotlinDslPluginOptions {
 }
 
 repositories {
-    mavenLocal()
     jcenter()
 }
 

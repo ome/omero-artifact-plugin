@@ -19,7 +19,7 @@
  *
  * ------------------------------------------------------------------------------
  */
-package org.openmicroscopy
+package org.openmicroscopy.artifact
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -27,9 +27,7 @@ import org.gradle.kotlin.dsl.*
 
 class ProjectPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
-        apply<AdditionalRepositoriesPlugin>()
-        apply<AdditionalArtifactsPlugin>()
-        // apply<ReleasePlugin>()
-        apply<PublishingPlugin>()
+        apply<ArtifactPlugin>()
+        apply<ProjectRepositoriesPlugin>()
     }
 }

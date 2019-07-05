@@ -1,4 +1,4 @@
-package org.openmicroscopy
+package org.openmicroscopy.artifact
 
 import groovy.lang.GroovyObject
 import org.gradle.api.Plugin
