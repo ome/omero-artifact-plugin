@@ -41,12 +41,8 @@ import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
 import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
 import org.openmicroscopy.dsl.MavenPomExtensions.Companion.licenseGnu2
 import org.openmicroscopy.dsl.ProjectExtensions.Companion.camelCaseName
-import org.openmicroscopy.dsl.ProjectExtensions.Companion.createArtifactoryMavenRepo
-import org.openmicroscopy.dsl.ProjectExtensions.Companion.createGitlabMavenRepo
-import org.openmicroscopy.dsl.ProjectExtensions.Companion.createStandardMavenRepo
 import org.openmicroscopy.dsl.ProjectExtensions.Companion.getRuntimeClasspathConfiguration
 import org.openmicroscopy.dsl.ProjectExtensions.Companion.resolveProperty
-import org.openmicroscopy.dsl.RepositoryHandlerExtensions.Companion.safeAdd
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -91,12 +87,6 @@ class PublishingPlugin : Plugin<Project> {
     private
     fun Project.configurePublishingExtensionSimple() {
         configure<PublishingExtension> {
-            repositories {
-                safeAdd(createArtifactoryMavenRepo())
-                safeAdd(createGitlabMavenRepo())
-                safeAdd(createStandardMavenRepo())
-            }
-
             // Publication meant for production and includes docs
             val publication = publications.create<MavenPublication>(camelCaseName()) {
                 from(components["java"])
