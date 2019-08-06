@@ -12,13 +12,12 @@ import org.gradle.plugin.devel.plugins.JavaGradlePluginPlugin
 import org.jfrog.gradle.plugin.artifactory.ArtifactoryPlugin
 import org.jfrog.gradle.plugin.artifactory.dsl.ArtifactoryPluginConvention
 import org.jfrog.gradle.plugin.artifactory.dsl.PublisherConfig
-import org.openmicroscopy.dsl.MavenPomExtensions.Companion.licenseGnu2
-import org.openmicroscopy.dsl.ProjectExtensions.Companion.createArtifactoryMavenRepo
-import org.openmicroscopy.dsl.ProjectExtensions.Companion.createGitlabMavenRepo
-import org.openmicroscopy.dsl.ProjectExtensions.Companion.createStandardMavenRepo
-import org.openmicroscopy.dsl.ProjectExtensions.Companion.resolveProperty
-import org.openmicroscopy.dsl.RepositoryHandlerExtensions.Companion.safeAdd
-
+import org.openmicroscopy.artifact.dsl.MavenPomExtensions.Companion.licenseGnu2
+import org.openmicroscopy.artifact.dsl.ProjectExtensions.Companion.createArtifactoryMavenRepo
+import org.openmicroscopy.artifact.dsl.ProjectExtensions.Companion.createGitlabMavenRepo
+import org.openmicroscopy.artifact.dsl.ProjectExtensions.Companion.createStandardMavenRepo
+import org.openmicroscopy.artifact.dsl.ProjectExtensions.Companion.resolveProperty
+import org.openmicroscopy.artifact.dsl.RepositoryHandlerExtensions.Companion.safeAdd
 
 class PluginPublishingPlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {

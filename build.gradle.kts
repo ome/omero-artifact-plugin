@@ -57,11 +57,11 @@ gradlePlugin {
         }
         register("plugin-project-plugin") {
             id = "org.openmicroscopy.plugin-project"
-            implementationClass = "org.openmicroscopy.PluginProjectPlugin"
+            implementationClass = "org.openmicroscopy.artifact.PluginProjectPlugin"
         }
         register("project-plugin") {
             id = "org.openmicroscopy.project"
-            implementationClass = "org.openmicroscopy.ProjectPlugin"
+            implementationClass = "org.openmicroscopy.artifact.ProjectPlugin"
         }
     }
 }
