@@ -4,7 +4,7 @@ plugins {
     `java-gradle-plugin`
     id("org.openmicroscopy.additional-artifacts")
     id("org.openmicroscopy.additional-repositories")
-    id("org.openmicroscopy.publishing")
+    id("org.openmicroscopy.plugin-publishing")
 }
 
 group = "org.openmicroscopy"
@@ -47,17 +47,18 @@ gradlePlugin {
             id = "org.openmicroscopy.functional-test"
             implementationClass = "org.openmicroscopy.artifact.FunctionalTestPlugin"
         }
-        register("publishing-plugin") {
-            id = "org.openmicroscopy.publishing"
-            implementationClass = "org.openmicroscopy.artifact.PublishingPlugin"
-        }
-        register("artifact-plugin") {
-            id = "org.openmicroscopy.artifact"
-            implementationClass = "org.openmicroscopy.artifact.ArtifactPlugin"
-        }
         register("plugin-project-plugin") {
             id = "org.openmicroscopy.plugin-project"
             implementationClass = "org.openmicroscopy.artifact.PluginProjectPlugin"
+        }
+        register("plugin-publishing-plugin") {
+            id = "org.openmicroscopy.plugin-publishing"
+            implementationClass = "org.openmicroscopy.artifact.PluginPublishingPlugin"
+        }
+
+        register("publishing-plugin") {
+            id = "org.openmicroscopy.publishing"
+            implementationClass = "org.openmicroscopy.artifact.PublishingPlugin"
         }
         register("project-plugin") {
             id = "org.openmicroscopy.project"
