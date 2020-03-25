@@ -65,19 +65,7 @@ class PublishingPlugin : Plugin<Project> {
         apply<MavenPublishPlugin>()
         apply<ArtifactoryPlugin>()
     }
-
-    // ORIGINAL
-    /* jar {
-        manifest {
-            attributes(
-                    'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
-            'Created-By': "Gradle ${gradle.gradleVersion}",
-            'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
-            'Main-Class': 'ome.util.tasks.Run',
-            "Class-Path": configurations.runtimeClasspath.collect { it.getName() }.join(' ')
-            )
-        }
-    }*/
+    
     private
     fun Project.configureManifest() {
         plugins.withType<JavaPlugin> {
