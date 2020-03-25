@@ -152,29 +152,11 @@ class PublishingPlugin : Plugin<Project> {
         }
     }
 
-    private
-    fun Project.repositoriesXml(xml: XmlProvider): Node {
-        val repositoriesNode = xml.asNode().appendNode("repositories")
-        repositories.forEach {
-            if (it is MavenArtifactRepository) {
-                val repositoryNode = repositoriesNode.appendNode("repository")
-                repositoryNode.appendNode("id", it.name)
-                repositoryNode.appendNode("name", it.name)
-                repositoryNode.appendNode("url", it.url)
-            }
-        }
-        return repositoriesNode
-    }
 
     private
     fun Project.standardPom(): Action<in MavenPom>? {
         return Action {
             licenseGnu2()
-            afterEvaluate {
-                withXml {
-                    repositoriesXml(this)
-                }
-            }
         }
     }
 }
