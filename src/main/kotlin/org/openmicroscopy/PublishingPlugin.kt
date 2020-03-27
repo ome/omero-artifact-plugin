@@ -65,19 +65,7 @@ class PublishingPlugin : Plugin<Project> {
         apply<MavenPublishPlugin>()
         apply<ArtifactoryPlugin>()
     }
-
-    // ORIGINAL
-    /* jar {
-        manifest {
-            attributes(
-                    'Build-Timestamp': new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(new Date()),
-            'Created-By': "Gradle ${gradle.gradleVersion}",
-            'Build-Jdk': "${System.properties['java.version']} (${System.properties['java.vendor']} ${System.properties['java.vm.version']})",
-            'Main-Class': 'ome.util.tasks.Run',
-            "Class-Path": configurations.runtimeClasspath.collect { it.getName() }.join(' ')
-            )
-        }
-    }*/
+    
     private
     fun Project.configureManifest() {
         plugins.withType<JavaPlugin> {
@@ -152,29 +140,11 @@ class PublishingPlugin : Plugin<Project> {
         }
     }
 
-    private
-    fun Project.repositoriesXml(xml: XmlProvider): Node {
-        val repositoriesNode = xml.asNode().appendNode("repositories")
-        repositories.forEach {
-            if (it is MavenArtifactRepository) {
-                val repositoryNode = repositoriesNode.appendNode("repository")
-                repositoryNode.appendNode("id", it.name)
-                repositoryNode.appendNode("name", it.name)
-                repositoryNode.appendNode("url", it.url)
-            }
-        }
-        return repositoriesNode
-    }
 
     private
     fun Project.standardPom(): Action<in MavenPom>? {
         return Action {
             licenseGnu2()
-            afterEvaluate {
-                withXml {
-                    repositoriesXml(this)
-                }
-            }
         }
     }
 }
