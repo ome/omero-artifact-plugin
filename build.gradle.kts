@@ -12,7 +12,14 @@ kotlinDslPluginOptions {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
+    maven {
+        setUrl("https://plugins.gradle.org/m2/")
+    }
+    maven {
+        name = "ajoberstar-backup"
+        setUrl("https://ajoberstar.github.io/bintray-backup/")
+    }
 }
 
 java {
@@ -23,10 +30,10 @@ java {
 dependencies {
     implementation(kotlin("gradle-plugin"))
     implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3")
-    implementation("org.ajoberstar:grgit:1.9.1") {
+    implementation("org.ajoberstar:grgit:1.7.2") {
         setForce(true)
     }
-    implementation("org.ajoberstar:gradle-git:1.7.1")
+    implementation("org.ajoberstar:gradle-git:1.7.2")
     implementation("org.ajoberstar:gradle-git-publish:0.3.3")
 }
 
