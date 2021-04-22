@@ -16,10 +16,6 @@ repositories {
     maven {
         setUrl("https://plugins.gradle.org/m2/")
     }
-    maven {
-        name = "ajoberstar-backup"
-        setUrl("https://ajoberstar.github.io/bintray-backup/")
-    }
 }
 
 java {
