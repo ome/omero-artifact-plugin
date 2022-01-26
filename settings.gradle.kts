@@ -1,6 +1,8 @@
 pluginManagement {
     repositories {
-        jcenter()
+        mavenLocal()
+        mavenCentral()
+        maven { url 'https://artifacts.openmicroscopy.org/artifactory/maven' }
         gradlePluginPortal()
     }
 }
