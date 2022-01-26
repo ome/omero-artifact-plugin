@@ -2,8 +2,9 @@ pluginManagement {
     repositories {
         mavenLocal()
         mavenCentral()
-        maven { url 'https://artifacts.openmicroscopy.org/artifactory/maven' }
-        gradlePluginPortal()
+        maven {
+          setUrl("https://plugins.gradle.org/m2/")
+        }
     }
 }
 
