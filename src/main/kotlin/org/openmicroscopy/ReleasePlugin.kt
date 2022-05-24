@@ -34,6 +34,7 @@ import org.gradle.kotlin.dsl.closureOf
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.delegateClosureOf
 
+@Deprecated(message="Deprecated since 5.5.3")
 class ReleasePlugin : Plugin<Project> {
     override fun apply(project: Project): Unit = project.run {
         applyGrgitPlugin()
