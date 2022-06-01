@@ -94,21 +94,6 @@ class PublishingPlugin : Plugin<Project> {
             }
 
             publications {
-                create<MavenPublication>("${camelCaseName()}Binary") {
-                    plugins.withType<JavaPlugin> {
-                        from(components["java"])
-                    }
-                    pom(standardPom())
-                }
-
-                create<MavenPublication>("${camelCaseName()}BinaryAndSources") {
-                    plugins.withType<JavaPlugin> {
-                        from(components["java"])
-                        artifact(tasks.getByName("sourcesJar"))
-                    }
-                    pom(standardPom())
-                }
-
                 create<MavenPublication>(camelCaseName()) {
                     plugins.withType<JavaPlugin> {
                         from(components["java"])
