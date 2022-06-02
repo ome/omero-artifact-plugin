@@ -1,3 +1,8 @@
+5.5.4 (June 2020)
+------------------
+
+- Remove multiple Maven publications ([#19](https://github.com/ome/omero-artifact-plugin/pull/19))
+
 5.5.3 (June 2020)
 ------------------
 
