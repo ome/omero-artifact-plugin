@@ -118,8 +118,16 @@ class PluginHelper {
         }
 
         fun Project.camelCaseName(): String {
-            //return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, name)
-            return name
+
+            val builder = StringBuilder()
+            for (v in name.split("-")) {
+                if (builder.toString() == "") {
+                    builder.append(v)
+                } else {
+                    builder.append(v.substring(0, 1).toUpperCase()).append(v.substring(1))
+                }
+            }
+            return builder.toString()
         }
     }
 
