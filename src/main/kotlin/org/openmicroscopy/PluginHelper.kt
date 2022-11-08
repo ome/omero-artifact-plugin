@@ -21,7 +21,6 @@
  */
 package org.openmicroscopy
 
-import com.google.common.base.CaseFormat
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -119,7 +118,8 @@ class PluginHelper {
         }
 
         fun Project.camelCaseName(): String {
-            return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, name)
+            //return CaseFormat.LOWER_HYPHEN.to(CaseFormat.LOWER_CAMEL, name)
+            return name
         }
     }
 
