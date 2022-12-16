@@ -23,9 +23,6 @@ class AdditionalArtifactsPlugin : Plugin<Project> {
                 // Configure java doc options
                 val stdOpts = options as StandardJavadocDocletOptions
                 stdOpts.addStringOption("Xdoclint:none", "-quiet")
-                if (JavaVersion.current().isJava9Compatible) {
-                    stdOpts.addBooleanOption("html5", true)
-                }
             }
 
             tasks.register<Jar>("sourcesJar") {
