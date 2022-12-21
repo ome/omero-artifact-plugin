@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("gradle-plugin"))
-    implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3")
+    implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.29.2")
     implementation("org.ajoberstar:grgit:1.9.1") {
         setForce(true)
     }
