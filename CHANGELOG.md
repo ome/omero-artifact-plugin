@@ -1,10 +1,15 @@
+5.6.0 (December 2022)
+---------------------
+
+- Remove deprecated html flag removed in newer version of Java ([#21](https://github.com/ome/omero-artifact-plugin/pull/21))
+
 5.5.4 (June 2020)
-------------------
+-----------------
 
 - Remove multiple Maven publications ([#19](https://github.com/ome/omero-artifact-plugin/pull/19))
 
 5.5.3 (June 2020)
-------------------
+-----------------
 
 - Add deployment workflow ([#18](https://github.com/ome/omero-artifact-plugin/pull/18))
 - Remove jcenter and deprecate `ReleasePlugin` ([#17](https://github.com/ome/omero-artifact-plugin/pull/17))
