@@ -57,9 +57,5 @@ gradlePlugin {
             id = "org.openmicroscopy.plugin-publishing"
             implementationClass = "org.openmicroscopy.PluginPublishingPlugin"
         }
-        register("release-plugin") {
-            id = "org.openmicroscopy.release"
-            implementationClass = "org.openmicroscopy.ReleasePlugin"
-        }
     }
 }
