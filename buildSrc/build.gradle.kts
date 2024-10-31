@@ -16,7 +16,7 @@ configure<JavaPluginConvention> {
 }
 
 repositories {
-    jcenter()
+    mavenCentral()
 }
 
 dependencies {
