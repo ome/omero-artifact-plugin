@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     implementation(kotlin("gradle-plugin"))
-    implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3")
+    implementation("org.jfrog.buildinfo:build-info-extractor-gradle:5.2.5")
     implementation("org.ajoberstar.grgit:grgit-gradle:5.3.0") 
     implementation("org.ajoberstar.git-publish:gradle-git-publish:4.2.2")
 }
