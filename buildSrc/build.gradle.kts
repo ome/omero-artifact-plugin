@@ -10,11 +10,6 @@ kotlinDslPluginOptions {
     experimentalWarning.set(false)
 }
 
-configure<JavaPluginConvention> {
-    sourceCompatibility = JavaVersion.VERSION_11
-    targetCompatibility = JavaVersion.VERSION_11
-}
-
 repositories {
     maven {
       setUrl("https://artifacts.openmicroscopy.org/artifactory/maven")
