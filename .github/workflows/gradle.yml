@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    uses: ome/action-workflows/.github/workflows/gradle_build.yml@v2.1
+    uses: ome/action-workflows/.github/workflows/gradle_build.yml@java_11
   publish_snapshots:
     if: ${{ github.ref == 'refs/heads/master' && github.repository_owner == 'ome' }}
     needs: build
