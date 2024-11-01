@@ -18,10 +18,6 @@ repositories {
     }
 }
 
-//java {
-//   sourceCompatibility = JavaVersion.VERSION_11
- //   targetCompatibility = JavaVersion.VERSION_11
-//}
 
 allprojects {
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
