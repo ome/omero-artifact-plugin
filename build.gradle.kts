@@ -13,22 +13,26 @@ kotlinDslPluginOptions {
 
 repositories {
     mavenCentral()
-    gradlePluginPortal()
+    maven {
+      setUrl("https://artifacts.openmicroscopy.org/artifactory/maven")
+    }
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
+
+allprojects {
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = JavaVersion.VERSION_1_8.toString()
+        }
+    }
 }
 
 dependencies {
     implementation(kotlin("gradle-plugin"))
     implementation("org.jfrog.buildinfo:build-info-extractor-gradle:4.9.3")
-    implementation("org.ajoberstar:grgit:1.9.1") {
-        setForce(true)
-    }
-    implementation("org.ajoberstar:gradle-git:1.7.1")
-    implementation("org.ajoberstar:gradle-git-publish:0.3.3")
+    implementation("org.ajoberstar.grgit:grgit-core:5.3.0") 
+    implementation("org.ajoberstar.grgit:grgit-gradle:5.3.0") 
+    implementation("org.ajoberstar.git-publish:gradle-git-publish:4.2.2")
 }
 
 gradlePlugin {
@@ -56,10 +60,6 @@ gradlePlugin {
         register("plugin-publishing-plugin") {
             id = "org.openmicroscopy.plugin-publishing"
             implementationClass = "org.openmicroscopy.PluginPublishingPlugin"
-        }
-        register("release-plugin") {
-            id = "org.openmicroscopy.release"
-            implementationClass = "org.openmicroscopy.ReleasePlugin"
         }
     }
 }
