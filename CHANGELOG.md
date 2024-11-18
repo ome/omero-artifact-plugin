@@ -1,4 +1,4 @@
-5.6.0 (November 2024)
+5.7.0 (November 2024)
 ---------------------
 
 - Remove support for Java 8([#25](https://github.com/ome/omero-artifact-plugin/pull/125))
