@@ -118,9 +118,15 @@ class PluginHelper {
         }
 
         fun Project.camelCaseName(): String {
-            // Remove 
-            val camelRegex = "(?<=[a-zA-Z])[A-Z]".toRegex()
-            return camelRegex.replace(name) { "_${it.value}"}.toLowerCase()
+            val builder = StringBuilder()
+            for (v in name.split("-")) {
+                if (builder.toString() == "") {
+                    builder.append(v)
+                } else {
+                    builder.append(v.substring(0, 1).toUpperCase()).append(v.substring(1))
+                }
+            }
+            return builder.toString()
         }
     }
 
