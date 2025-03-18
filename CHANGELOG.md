@@ -1,8 +1,12 @@
 5.7.0 (November 2024)
 ---------------------
 
-- Remove support for Java 8([#25](https://github.com/ome/omero-artifact-plugin/pull/125))
+- Remove support for Java 8 ([#25](https://github.com/ome/omero-artifact-plugin/pull/125))
 
+5.6.0 (December 2022)
+---------------------
+
+- Remove deprecated html flag removed in newer version of Java ([#21](https://github.com/ome/omero-artifact-plugin/pull/21))
 
 5.5.4 (June 2020)
 ------------------
