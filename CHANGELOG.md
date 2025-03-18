@@ -1,3 +1,8 @@
+5.7.1 (March 2025)
+------------------
+
+- Bump build-info-extractor-gradle to 4.34.1 ([#26](https://github.com/ome/omero-artifact-plugin/pull/2))
+
 5.7.0 (November 2024)
 ---------------------
 
