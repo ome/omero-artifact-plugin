@@ -1,12 +1,17 @@
+5.7.2 (March 2025)
+------------------
+
+- Fix camel case conversion ([#27](https://github.com/ome/omero-artifact-plugin/pull/27))
+
 5.7.1 (March 2025)
 ------------------
 
-- Bump build-info-extractor-gradle to 4.34.1 ([#26](https://github.com/ome/omero-artifact-plugin/pull/2))
+- Bump build-info-extractor-gradle to 4.34.1 ([#26](https://github.com/ome/omero-artifact-plugin/pull/26))
 
 5.7.0 (November 2024)
 ---------------------
 
-- Remove support for Java 8 ([#25](https://github.com/ome/omero-artifact-plugin/pull/125))
+- Remove support for Java 8 ([#25](https://github.com/ome/omero-artifact-plugin/pull/25))
 
 5.6.0 (December 2022)
 ---------------------
