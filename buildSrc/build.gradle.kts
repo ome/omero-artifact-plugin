@@ -23,6 +23,7 @@ dependencies {
     implementation("org.ajoberstar.grgit:grgit-core:5.3.0") 
     implementation("org.ajoberstar.grgit:grgit-gradle:5.3.0") 
     implementation("org.ajoberstar.git-publish:gradle-git-publish:4.2.2")
+    implementation("com.google.guava:guava:32.0.1-jre")
 }
 
 gradlePlugin {
